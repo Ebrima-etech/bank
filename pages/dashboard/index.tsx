@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
@@ -6,6 +8,7 @@ import Button from '@/components/Common/Button';
 import { BankPaymentSubmission } from '@/types';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglassBottom, BiListUl, BiDollar } from 'react-icons/bi';
 
 export default function BankDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -28,7 +31,6 @@ export default function BankDashboardPage() {
       const data = response.data.results || response.data;
       setSubmissions(data);
 
-      // Calculate stats
       const total = data.length;
       const amount = data.reduce((sum: number, s: BankPaymentSubmission) => sum + s.amount, 0);
       const verified = data.filter((s: BankPaymentSubmission) => s.status === 'verified').length;
@@ -44,109 +46,95 @@ export default function BankDashboardPage() {
 
   if (loading) return <Layout><Loading /></Layout>;
 
+  const statCards = [
+    { icon: BiListUl, label: 'Total Submissions', value: stats.total, color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
+    { icon: BiDollar, label: 'Total Amount', value: formatCurrency(stats.amount), color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' },
+    { icon: BiCheckCircle, label: 'Verified', value: stats.verified, color: 'text-emerald-600', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-200' },
+    { icon: BiHourglassBottom, label: 'Pending', value: stats.pending, color: 'text-amber-600', bgColor: 'bg-amber-50', borderColor: 'border-amber-200' },
+  ];
+
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50 p-8 space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Bank Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage and submit payment batches</p>
-          </div>
-          <div className="flex gap-2 mt-4 sm:mt-0">
-            <Link href="/dashboard/submit-payment">
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white">+ Manual Payment</Button>
-            </Link>
-            <Link href="/dashboard/bulk-upload">
-              <Button variant="secondary" className="bg-amber-100 text-amber-900 hover:bg-amber-200">📤 Bulk Upload</Button>
-            </Link>
+      <div className="min-h-screen bg-white p-8">
+        {/* Header */}
+        <div className="mb-8 border-b border-gray-200 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Payment Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-2">Manage and submit payment batches</p>
+            </div>
+            <div className="flex gap-3 mt-4 sm:mt-0">
+              <Link href="/dashboard/submit-payment">
+                <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+                  <BiPlus size={18} /> Manual Payment
+                </Button>
+              </Link>
+              <Link href="/dashboard/bulk-upload">
+                <Button variant="secondary" className="flex items-center gap-2 bg-gray-100 text-gray-700 hover:bg-gray-200">
+                  <BiUpload size={18} /> Bulk Upload
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm hover:shadow-md transition">
-            <p className="text-sm font-medium text-gray-600">Total Submissions</p>
-            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.total}</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm hover:shadow-md transition">
-            <p className="text-sm font-medium text-gray-600">Total Amount</p>
-            <p className="text-2xl font-bold text-amber-600 mt-2">{formatCurrency(stats.amount)}</p>
-          </div>
-          <div className="bg-green-50 p-6 rounded-xl border border-green-200 shadow-sm hover:shadow-md transition">
-            <p className="text-sm font-medium text-gray-600">✓ Verified</p>
-            <p className="text-2xl font-bold text-green-600 mt-2">{stats.verified}</p>
-          </div>
-          <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm hover:shadow-md transition">
-            <p className="text-sm font-medium text-gray-600">⏳ Pending</p>
-            <p className="text-2xl font-bold text-amber-600 mt-2">{stats.pending}</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {statCards.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div key={idx} className={`${stat.bgColor} border ${stat.borderColor} rounded-lg p-6 hover:shadow-md transition-shadow`}>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">{stat.label}</p>
+                    <p className={`text-2xl font-bold ${stat.color} mt-3`}>{stat.value}</p>
+                  </div>
+                  <Icon size={24} className={`${stat.color} opacity-20`} />
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Recent Submissions */}
-        <div className="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-amber-200 bg-amber-50">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Recent Submissions</h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-amber-50 border-b border-amber-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Reference</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Pilgrim ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Method</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {submissions.length > 0 ? (
-                  submissions.slice(0, 10).map((submission) => (
-                    <tr key={submission.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-sm font-semibold text-primary-600">{submission.reference_number}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{submission.pilgrim_id}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{formatCurrency(submission.amount)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 capitalize">{submission.submission_method.replace('_', ' ')}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}>
-                          {submission.status}
+          {submissions.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr className="border-b border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submissions.slice(0, 10).map((sub, idx) => (
+                    <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">#{sub.id}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(sub.amount)}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          sub.status === 'verified' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(submission.submitted_at)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(sub.submitted_at)}</td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                      No submissions yet. <Link href="/dashboard/submit-payment" className="text-primary-600 font-medium">Submit your first payment</Link>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Link href="/dashboard/submit-payment" className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 hover:shadow-md transition">
-            <div className="text-2xl mb-2">📝</div>
-            <h3 className="font-semibold text-gray-900">Submit Payment</h3>
-            <p className="text-sm text-gray-600 mt-1">Enter pilgrim and payment details manually</p>
-          </Link>
-
-          <Link href="/dashboard/bulk-upload" className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 hover:shadow-md transition">
-            <div className="text-2xl mb-2">📤</div>
-            <h3 className="font-semibold text-gray-900">Bulk Upload</h3>
-            <p className="text-sm text-gray-600 mt-1">Upload multiple payments via CSV file</p>
-          </Link>
-
-          <Link href="/dashboard/api-integration" className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 hover:shadow-md transition">
-            <div className="text-2xl mb-2">🔌</div>
-            <h3 className="font-semibold text-gray-900">API Integration</h3>
-            <p className="text-sm text-gray-600 mt-1">Integrate via API webhook or Postman</p>
-          </Link>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <p className="text-gray-500">No submissions yet</p>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
