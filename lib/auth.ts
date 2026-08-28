@@ -1,4 +1,6 @@
 import api from './api';
+import type { BankUser } from '@/types';
+
 export type { BankUser } from '@/types';
 
 export interface BankLoginResponse {
