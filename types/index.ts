@@ -1,13 +1,3 @@
-export interface BankUser {
-  id: string;
-  username: string;
-  email: string;
-  bank_name: string;
-  first_name?: string;
-  last_name?: string;
-  is_active: boolean;
-}
-
 export interface BankPaymentSubmission {
   id: string;
   bank: number;

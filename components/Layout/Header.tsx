@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { bankLogout, getBankUser } from '@/lib/auth';
-import { BankUser } from '@/types';
+import { bankLogout, getBankUser, BankUser } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 export default function Header() {
