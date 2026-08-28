@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import Button from '@/components/Common/Button';
 import { BiPlus, BiTrash, BiX, BiUser } from 'react-icons/bi';
@@ -19,7 +20,9 @@ interface StaffMember {
 }
 
 export default function StaffManagementPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,8 +32,25 @@ export default function StaffManagementPage() {
   });
 
   useEffect(() => {
-    fetchStaff();
+    checkAuthorization();
   }, []);
+
+  const checkAuthorization = async () => {
+    try {
+      const rolesResponse = await api.get('/user-roles/?role=bank_admin');
+      const adminRoles = rolesResponse.data.results || rolesResponse.data;
+      if (adminRoles.length > 0) {
+        setAuthorized(true);
+        fetchStaff();
+      } else {
+        toast.error('Unauthorized: Only bank admins can manage staff');
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error checking authorization:', error);
+      router.push('/dashboard');
+    }
+  };
 
   const fetchStaff = async () => {
     try {
@@ -87,6 +107,19 @@ export default function StaffManagementPage() {
       toast.error('Failed to remove staff member');
     }
   };
+
+  if (!authorized) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-white p-8 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg text-red-600 font-semibold">Unauthorized</p>
+            <p className="text-gray-600 mt-2">Only bank admins can access this section</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

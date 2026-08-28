@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { bankLogout, getBankUser, BankUser } from '@/lib/auth';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<BankUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -14,6 +16,15 @@ export default function Header() {
       try {
         const userData = await getBankUser();
         setUser(userData);
+
+        // Check if user is bank admin
+        try {
+          const rolesResponse = await api.get('/user-roles/?role=bank_admin');
+          const adminRoles = rolesResponse.data.results || rolesResponse.data;
+          setIsAdmin(adminRoles.length > 0);
+        } catch (error) {
+          setIsAdmin(false);
+        }
       } catch (error) {
         console.error('Failed to fetch user:', error);
       }
@@ -57,9 +68,11 @@ export default function Header() {
             <Link href="/dashboard/submit-payment" className="text-sm text-gray-700 hover:text-gray-900">
               Submit Payment
             </Link>
-            <Link href="/dashboard/staff" className="text-sm text-gray-700 hover:text-gray-900">
-              Staff
-            </Link>
+            {isAdmin && (
+              <Link href="/dashboard/staff" className="text-sm text-gray-700 hover:text-gray-900">
+                Staff
+              </Link>
+            )}
             {user && (
               <>
                 <div className="text-right border-l border-gray-200 pl-6">
@@ -85,9 +98,11 @@ export default function Header() {
             <Link href="/dashboard/submit-payment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
               Submit Payment
             </Link>
-            <Link href="/dashboard/staff" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-              Staff Management
-            </Link>
+            {isAdmin && (
+              <Link href="/dashboard/staff" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                Staff Management
+              </Link>
+            )}
             {user && (
               <button
                 onClick={handleLogout}
