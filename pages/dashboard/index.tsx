@@ -8,7 +8,7 @@ import Button from '@/components/Common/Button';
 import { BankPaymentSubmission } from '@/types';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglassBottom, BiListUl, BiDollar } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar } from 'react-icons/bi';
 
 export default function BankDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function BankDashboardPage() {
     { icon: BiListUl, label: 'Total Submissions', value: stats.total, color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
     { icon: BiDollar, label: 'Total Amount', value: formatCurrency(stats.amount), color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' },
     { icon: BiCheckCircle, label: 'Verified', value: stats.verified, color: 'text-emerald-600', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-200' },
-    { icon: BiHourglassBottom, label: 'Pending', value: stats.pending, color: 'text-amber-600', bgColor: 'bg-amber-50', borderColor: 'border-amber-200' },
+    { icon: BiHourglass, label: 'Pending', value: stats.pending, color: 'text-amber-600', bgColor: 'bg-amber-50', borderColor: 'border-amber-200' },
   ];
 
   return (
