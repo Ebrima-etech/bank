@@ -81,8 +81,8 @@ export default function StaffManagementPage() {
   const handleDeleteStaff = async (id: number) => {
     if (!confirm('Are you sure you want to remove this staff member?')) return;
     try {
-      // Note: You may need to add a delete endpoint for user roles
-      toast.info('Feature coming soon');
+      // TODO: Implement delete endpoint for user roles
+      toast.success('Staff member removal feature coming soon');
     } catch (error) {
       toast.error('Failed to remove staff member');
     }
