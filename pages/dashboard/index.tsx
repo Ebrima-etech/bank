@@ -51,7 +51,7 @@ export default function BankDashboardPage() {
 
       // Filter submissions by current user if they're staff
       if (isStaff && user) {
-        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by?.id === user.id);
+        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === user.username);
       }
 
       setSubmissions(data);
