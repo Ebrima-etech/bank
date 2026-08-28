@@ -5,14 +5,17 @@ import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Loading from '@/components/Common/Loading';
 import Button from '@/components/Common/Button';
-import { BankPaymentSubmission } from '@/types';
+import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
+import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
 import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar } from 'react-icons/bi';
 
 export default function BankDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<BankPaymentSubmission[]>([]);
+  const [user, setUser] = useState<BankUser | null>(null);
+  const [isStaff, setIsStaff] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
@@ -21,14 +24,36 @@ export default function BankDashboardPage() {
   });
 
   useEffect(() => {
-    fetchSubmissions();
+    const initializePage = async () => {
+      try {
+        const userData = await getBankUser();
+        setUser(userData);
+
+        // Check if user is bank staff
+        const rolesResponse = await api.get('/user-roles/?role=bank_staff');
+        const staffRoles = rolesResponse.data.results || rolesResponse.data;
+        setIsStaff(staffRoles.length > 0);
+      } catch (error) {
+        console.error('Error checking user role:', error);
+      }
+
+      await fetchSubmissions();
+    };
+
+    initializePage();
   }, []);
 
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
       const response = await api.get('/bank-payment-submissions/');
-      const data = response.data.results || response.data;
+      let data = response.data.results || response.data;
+
+      // Filter submissions by current user if they're staff
+      if (isStaff && user) {
+        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by?.id === user.id);
+      }
+
       setSubmissions(data);
 
       const total = data.length;

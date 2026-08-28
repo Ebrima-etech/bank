@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import Button from '@/components/Common/Button';
 import Alert from '@/components/Common/Alert';
+import VoiceInputButton from '@/components/VoiceInputButton';
 import { ManualPaymentData } from '@/types';
 import api from '@/lib/api';
 import { generateReference } from '@/lib/utils';
@@ -82,15 +83,21 @@ export default function SubmitPaymentPage() {
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Pilgrim Registration ID (GHXXXXX) *
               </label>
-              <input
-                type="text"
-                name="pilgrim_id"
-                value={formData.pilgrim_id}
-                onChange={handleInputChange}
-                placeholder="e.g., GH123456"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
+              <div className="flex gap-2 items-start">
+                <input
+                  type="text"
+                  name="pilgrim_id"
+                  value={formData.pilgrim_id}
+                  onChange={handleInputChange}
+                  placeholder="e.g., GH123456"
+                  required
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                />
+                <VoiceInputButton
+                  onTranscript={(text) => setFormData({ ...formData, pilgrim_id: text.toUpperCase() })}
+                  fieldName="Pilgrim ID"
+                />
+              </div>
               <p className="text-xs text-gray-500 mt-1">Example: GH456789</p>
             </div>
 
@@ -157,14 +164,20 @@ export default function SubmitPaymentPage() {
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Description (Optional)
               </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Additional notes about this payment..."
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
+              <div className="flex gap-2">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Additional notes about this payment..."
+                  rows={3}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                />
+                <VoiceInputButton
+                  onTranscript={(text) => setFormData({ ...formData, description: text })}
+                  fieldName="Description"
+                />
+              </div>
             </div>
 
             {/* Buttons */}
