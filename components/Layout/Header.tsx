@@ -50,10 +50,19 @@ export default function Header() {
             </svg>
           </button>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900">
+              Dashboard
+            </Link>
+            <Link href="/dashboard/submit-payment" className="text-sm text-gray-700 hover:text-gray-900">
+              Submit Payment
+            </Link>
+            <Link href="/dashboard/staff" className="text-sm text-gray-700 hover:text-gray-900">
+              Staff
+            </Link>
             {user && (
               <>
-                <div className="text-right">
+                <div className="text-right border-l border-gray-200 pl-6">
                   <p className="text-sm font-medium text-gray-900">{user.username}</p>
                   <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
@@ -69,7 +78,16 @@ export default function Header() {
         </div>
 
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+            <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              Dashboard
+            </Link>
+            <Link href="/dashboard/submit-payment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              Submit Payment
+            </Link>
+            <Link href="/dashboard/staff" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              Staff Management
+            </Link>
             {user && (
               <button
                 onClick={handleLogout}
