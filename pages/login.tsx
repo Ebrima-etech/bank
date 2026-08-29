@@ -31,24 +31,39 @@ export default function BankLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-black flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      <div className="w-full max-w-sm relative z-10">
         {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Bank Portal</h1>
-          <p className="text-sm text-gray-600">GIA Hajj Payment System</p>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-600 rounded-lg mb-4">
+            <span className="text-white font-bold text-lg">G</span>
+          </div>
+          <h1 className="text-3xl font-semibold text-white mb-2">GIA Bank Portal</h1>
+          <p className="text-sm text-slate-400">Payment Processing System</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
+        <div className="bg-white/95 backdrop-blur-sm border border-white/10 rounded-lg p-8">
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Sign in</h2>
-            <p className="text-sm text-gray-600">to submit payments and track submissions</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Sign in</h2>
+            <p className="text-sm text-gray-600">to access payment dashboard</p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
               {error}
             </div>
           )}
@@ -65,7 +80,7 @@ export default function BankLoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username"
-                className="w-full px-4 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition bg-white text-sm"
                 required
               />
             </div>
@@ -80,7 +95,7 @@ export default function BankLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition bg-white text-sm"
                 required
               />
             </div>
@@ -88,7 +103,7 @@ export default function BankLoginPage() {
             <Button
               type="submit"
               loading={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2.5 rounded-lg text-sm"
             >
               Sign in
             </Button>
@@ -98,18 +113,27 @@ export default function BankLoginPage() {
           <div className="my-6 border-t border-gray-200"></div>
 
           {/* Info */}
-          <div className="text-xs text-gray-600">
-            <p className="font-medium text-gray-900 mb-2">Features</p>
-            <ul className="space-y-1 text-gray-600">
-              <li>• Submit payments (manual or bulk CSV)</li>
-              <li>• View submission history</li>
-              <li>• API documentation</li>
+          <div className="text-xs">
+            <p className="font-medium text-gray-900 mb-3">Quick Access</p>
+            <ul className="space-y-2 text-gray-600">
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
+                Submit payments manually
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
+                Bulk upload via CSV
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
+                Track submission history
+              </li>
             </ul>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-xs text-gray-500">
+        <div className="mt-8 text-center text-xs text-slate-400">
           <p>© 2026 Gambia International Airlines</p>
         </div>
       </div>
