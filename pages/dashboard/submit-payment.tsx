@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import PaymentStepsForm from '@/components/PaymentStepsForm';
@@ -84,6 +84,17 @@ export default function SubmitPaymentPage() {
       }));
     }
   };
+
+  // Auto-fill payer info when "Self" is selected
+  useEffect(() => {
+    if (formData.payer_relationship === 'Self' && formData.pilgrim_first_name && formData.pilgrim_last_name) {
+      setFormData((prev) => ({
+        ...prev,
+        payer_name: `${prev.pilgrim_first_name} ${prev.pilgrim_last_name}`,
+        payer_contact: '',
+      }));
+    }
+  }, [formData.payer_relationship]);
 
   const handleGenerateReference = () => {
     setFormData((prev) => ({
