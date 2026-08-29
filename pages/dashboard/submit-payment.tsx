@@ -165,7 +165,7 @@ export default function SubmitPaymentPage() {
 
       console.log('Submitting payment data:', submissionData);
 
-      const response = await api.post('/bank-payment-submissions/manual-submission/', submissionData);
+      const response = await api.post('/bank-payment-submissions/manual_submission/', submissionData);
       console.log('Submission response:', response.data);
 
       toast.success('Payment submitted successfully!');
