@@ -25,6 +25,11 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
   const [reference, setReference] = useState(generateReference());
   const [description, setDescription] = useState('');
 
+  // Payer info
+  const [payerName, setPayerName] = useState('');
+  const [payerContact, setPayerContact] = useState('');
+  const [payerRelationship, setPayerRelationship] = useState('Self');
+
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -68,6 +73,11 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
       return;
     }
 
+    if (!payerName.trim()) {
+      setError('Enter payer name');
+      return;
+    }
+
     setLoading(true);
     try {
       const depositData = {
@@ -76,13 +86,13 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         pilgrim_gender: pilgrimData.gender || 'M',
         pilgrim_phone: pilgrimData.phone,
         pilgrim_email: pilgrimData.email || '',
-        payer_name: `${pilgrimData.first_name} ${pilgrimData.last_name}`,
-        payer_contact: phone,
-        payer_relationship: 'Self',
+        payer_name: payerName,
+        payer_contact: payerContact,
+        payer_relationship: payerRelationship,
         amount: parseFloat(amount),
         reference_number: reference,
         payment_date: paymentDate,
-        description: description || `Quick deposit from existing pilgrim ${pilgrimData.registration_id}`,
+        description: description || `Deposit from existing pilgrim ${pilgrimData.registration_id}`,
       };
 
       await api.post('/bank-payment-submissions/manual-submission/', depositData);
@@ -199,6 +209,62 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         )}
 
         <form onSubmit={handleSubmitDeposit} className="space-y-4">
+          {/* Payer Information */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <h4 className="text-sm font-semibold text-blue-900 mb-3">Who is making this payment?</h4>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Payer Name *
+                </label>
+                <input
+                  type="text"
+                  value={payerName}
+                  onChange={(e) => setPayerName(e.target.value)}
+                  placeholder="Full name of person making deposit"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Payer Contact/ID
+                </label>
+                <input
+                  type="text"
+                  value={payerContact}
+                  onChange={(e) => setPayerContact(e.target.value)}
+                  placeholder="Phone, ID, or account number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Relationship to Pilgrim
+                </label>
+                <select
+                  value={payerRelationship}
+                  onChange={(e) => setPayerRelationship(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                >
+                  <option value="Self">Self (Pilgrim themselves)</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Child">Child</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Other Family">Other Family</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Employer">Employer</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Deposit Amount */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Amount (GMD) *
