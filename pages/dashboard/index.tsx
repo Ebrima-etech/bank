@@ -69,16 +69,32 @@ export default function BankDashboardPage() {
       const response = await api.get('/bank-payment-submissions/');
       let data = response.data.results || response.data;
 
+      console.log('DEBUG: All submissions fetched:', data.length);
+      console.log('DEBUG: Current user:', user?.username);
+      console.log('DEBUG: Is admin:', isAdmin);
+      console.log('DEBUG: Selected date:', selectedDate);
+
       // Filter by date (YYYY-MM-DD format)
       data = data.filter((sub: BankPaymentSubmission) => {
         const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
         return submissionDate === selectedDate;
       });
 
+      console.log('DEBUG: After date filter:', data.length);
+      console.log('DEBUG: Sample records submitted_by_user values:', data.slice(0, 3).map(s => s.submitted_by_user));
+
       // Tellers can only see their own records
       // If NOT an admin (i.e., they're a teller), filter to show only their records
       if (!isAdmin && user) {
-        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === user.username);
+        console.log('DEBUG: Applying teller filter for user:', user.username);
+        data = data.filter((sub: BankPaymentSubmission) => {
+          const match = sub.submitted_by_user === user.username;
+          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${user.username} => ${match}`);
+          return match;
+        });
+        console.log('DEBUG: After user filter:', data.length);
+      } else {
+        console.log('DEBUG: Admin user, showing all records');
       }
       // Admins can see all records (already filtered by date above)
 
