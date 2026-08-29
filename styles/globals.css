@@ -11,7 +11,7 @@ body {
 }
 
 a {
-  @apply text-primary-600 hover:text-primary-700 underline;
+  @apply text-primary-600 hover:text-primary-700;
 }
 
 button:disabled {
