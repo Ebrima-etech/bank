@@ -14,7 +14,7 @@ export default function SubmitPaymentPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState<ManualPaymentData>({
-    pilgrim_id: '',
+    pilgrim_id: '', // Will be filled by backend search/lookup
     amount: 0,
     reference_number: generateReference(),
     payment_date: new Date().toISOString().split('T')[0],
@@ -77,23 +77,6 @@ export default function SubmitPaymentPage() {
         {/* Form */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Pilgrim ID */}
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Pilgrim Registration ID (GHXXXXX) *
-              </label>
-              <input
-                type="text"
-                name="pilgrim_id"
-                value={formData.pilgrim_id}
-                onChange={handleInputChange}
-                placeholder="e.g., GH123456"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">Example: GH456789</p>
-            </div>
-
             {/* Amount */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
