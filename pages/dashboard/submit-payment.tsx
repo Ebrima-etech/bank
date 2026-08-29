@@ -600,21 +600,21 @@ export default function SubmitPaymentPage() {
                   </div>
                 </div>
               )}
-              </PaymentStepsForm>
-            </form>
-          </div>
+            </PaymentStepsForm>
+          </form>
+        </div>
 
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm font-semibold text-blue-900 mb-2">💡 Important:</p>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• All pilgrim information will be recorded with this payment</li>
-              <li>• Payer information helps track the payment source</li>
-              <li>• Reference number must be unique for each transaction</li>
-              <li>• All amounts are in Gambian Dalasi (GMD)</li>
-            </ul>
-          </div>
-        )}
+        {/* Info Box */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-blue-900 mb-2">💡 Important:</p>
+          <ul className="text-sm text-blue-700 space-y-1">
+            <li>• All pilgrim information will be recorded with this payment</li>
+            <li>• Payer information helps track the payment source</li>
+            <li>• Reference number must be unique for each transaction</li>
+            <li>• All amounts are in Gambian Dalasi (GMD)</li>
+          </ul>
+        </div>
+      )}
       </div>
     </Layout>
   );
