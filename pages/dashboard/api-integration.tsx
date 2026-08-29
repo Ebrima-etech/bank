@@ -11,14 +11,29 @@ export default function APIIntegrationPage() {
     setTimeout(() => setCopied(''), 2000);
   };
 
-  const apiEndpoint = 'POST http://localhost:8000/api/v1/banks/payment-submissions/manual-submission/';
+  const apiEndpoint = 'POST https://igaa.onrender.com/api/v1/bank-payment-submissions/manual_submission/';
 
-  const curlExample = `curl -X POST http://localhost:8000/api/v1/banks/payment-submissions/manual-submission/ \\
+  const curlExample = `curl -X POST https://igaa.onrender.com/api/v1/bank-payment-submissions/manual_submission/ \\
   -H "Authorization: Bearer YOUR_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "pilgrim_id": "GH123456",
-    "amount": 5000,
+    "pilgrim_first_name": "Hassan",
+    "pilgrim_last_name": "Jallow",
+    "pilgrim_gender": "M",
+    "pilgrim_phone": "2203123456",
+    "pilgrim_email": "hassan@example.com",
+    "pilgrim_date_of_birth": "1990-05-15",
+    "pilgrim_nationality": "Gambian",
+    "pilgrim_passport_number": "GM987654",
+    "pilgrim_address": "123 Main St",
+    "pilgrim_city": "Banjul",
+    "pilgrim_state": "",
+    "pilgrim_postal_code": "123",
+    "pilgrim_country": "Gambia",
+    "payer_name": "Hassan Jallow",
+    "payer_contact": "",
+    "payer_relationship": "Self",
+    "amount": "5000.00",
     "reference_number": "REF20240101ABC",
     "payment_date": "2024-01-01",
     "description": "Payment from customer"
@@ -32,15 +47,27 @@ headers = {
 }
 
 data = {
-    "pilgrim_id": "GH123456",
-    "amount": 5000,
+    "pilgrim_first_name": "Hassan",
+    "pilgrim_last_name": "Jallow",
+    "pilgrim_gender": "M",
+    "pilgrim_phone": "2203123456",
+    "pilgrim_email": "hassan@example.com",
+    "pilgrim_date_of_birth": "1990-05-15",
+    "pilgrim_nationality": "Gambian",
+    "pilgrim_passport_number": "GM987654",
+    "pilgrim_address": "123 Main St",
+    "pilgrim_city": "Banjul",
+    "pilgrim_country": "Gambia",
+    "payer_name": "Hassan Jallow",
+    "payer_relationship": "Self",
+    "amount": 5000.00,
     "reference_number": "REF20240101ABC",
     "payment_date": "2024-01-01",
     "description": "Payment from customer"
 }
 
 response = requests.post(
-    "http://localhost:8000/api/v1/banks/payment-submissions/manual-submission/",
+    "https://igaa.onrender.com/api/v1/bank-payment-submissions/manual_submission/",
     headers=headers,
     json=data
 )`;
@@ -55,15 +82,27 @@ const config = {
 };
 
 const data = {
-  pilgrim_id: 'GH123456',
-  amount: 5000,
+  pilgrim_first_name: 'Hassan',
+  pilgrim_last_name: 'Jallow',
+  pilgrim_gender: 'M',
+  pilgrim_phone: '2203123456',
+  pilgrim_email: 'hassan@example.com',
+  pilgrim_date_of_birth: '1990-05-15',
+  pilgrim_nationality: 'Gambian',
+  pilgrim_passport_number: 'GM987654',
+  pilgrim_address: '123 Main St',
+  pilgrim_city: 'Banjul',
+  pilgrim_country: 'Gambia',
+  payer_name: 'Hassan Jallow',
+  payer_relationship: 'Self',
+  amount: 5000.00,
   reference_number: 'REF20240101ABC',
   payment_date: '2024-01-01',
   description: 'Payment from customer'
 };
 
 axios.post(
-  'http://localhost:8000/api/v1/banks/payment-submissions/manual-submission/',
+  'https://igaa.onrender.com/api/v1/bank-payment-submissions/manual_submission/',
   data,
   config
 ).then(response => console.log(response.data));`;

@@ -98,7 +98,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         description: description || `Quick deposit - ${pilgrimData.registration_id}`,
       };
 
-      await api.post('/bank-payment-submissions/manual-submission/', depositData);
+      await api.post('/bank-payment-submissions/manual_submission/', depositData);
       toast.success(`Deposit of ${amount} GMD recorded!`);
       setSuccess(true);
       setTimeout(() => {
