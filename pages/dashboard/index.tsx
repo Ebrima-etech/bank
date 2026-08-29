@@ -11,10 +11,17 @@ import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
 import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar } from 'react-icons/bi';
 
+interface Bank {
+  id: number;
+  name: string;
+  logo?: string | null;
+}
+
 export default function BankDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<BankPaymentSubmission[]>([]);
   const [user, setUser] = useState<BankUser | null>(null);
+  const [bank, setBank] = useState<Bank | null>(null);
   const [isStaff, setIsStaff] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
@@ -28,6 +35,18 @@ export default function BankDashboardPage() {
       try {
         const userData = await getBankUser();
         setUser(userData);
+
+        // Fetch bank associated with this user
+        try {
+          const rolesResponse = await api.get(`/user-roles/?user=${userData.id}`);
+          const userRoles = rolesResponse.data.results || rolesResponse.data;
+          if (userRoles.length > 0 && userRoles[0].bank) {
+            const bankResponse = await api.get(`/banks/${userRoles[0].bank.id}/`);
+            setBank(bankResponse.data);
+          }
+        } catch (error) {
+          console.error('Error fetching bank:', error);
+        }
 
         // Check if THIS user is bank staff (not just any staff exists)
         const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_staff`);
@@ -82,12 +101,29 @@ export default function BankDashboardPage() {
   return (
     <Layout>
       <div className="min-h-screen bg-white p-8">
+        {/* Bank Header */}
+        {bank && (
+          <div className="mb-8 pb-6 border-b border-gray-200 flex items-start gap-6">
+            {bank.logo ? (
+              <img src={bank.logo} alt={bank.name} className="h-16 w-16 object-contain" />
+            ) : (
+              <div className="h-16 w-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">🏦</span>
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{bank.name}</h1>
+              <p className="text-sm text-gray-500 mt-2">Payment Dashboard - Manage and submit payment batches</p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8 border-b border-gray-200 pb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Payment Dashboard</h1>
-              <p className="text-sm text-gray-500 mt-2">Manage and submit payment batches</p>
+              <h2 className="text-2xl font-bold text-gray-900">Recent Activity</h2>
+              <p className="text-sm text-gray-500 mt-2">Your latest payment submissions</p>
             </div>
             <div className="flex gap-3 mt-4 sm:mt-0">
               <Link href="/dashboard/submit-payment">

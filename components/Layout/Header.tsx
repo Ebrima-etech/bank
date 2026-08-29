@@ -5,9 +5,16 @@ import { bankLogout, getBankUser, BankUser } from '@/lib/auth';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
+interface Bank {
+  id: number;
+  name: string;
+  logo?: string | null;
+}
+
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<BankUser | null>(null);
+  const [bank, setBank] = useState<Bank | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -16,6 +23,18 @@ export default function Header() {
       try {
         const userData = await getBankUser();
         setUser(userData);
+
+        // Fetch bank associated with this user
+        try {
+          const rolesResponse = await api.get(`/user-roles/?user=${userData.id}`);
+          const userRoles = rolesResponse.data.results || rolesResponse.data;
+          if (userRoles.length > 0 && userRoles[0].bank) {
+            const bankResponse = await api.get(`/banks/${userRoles[0].bank.id}/`);
+            setBank(bankResponse.data);
+          }
+        } catch (error) {
+          console.error('Error fetching bank:', error);
+        }
 
         // Check if THIS specific user is a bank admin
         try {
@@ -46,11 +65,15 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">🏦</span>
-            </div>
+            {bank?.logo ? (
+              <img src={bank.logo} alt={bank.name} className="h-8 w-8 object-contain" />
+            ) : (
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">🏦</span>
+              </div>
+            )}
             <span className="hidden sm:inline font-bold text-lg text-gray-900">
-              Bank Portal
+              {bank?.name || 'Bank Portal'}
             </span>
           </Link>
 
