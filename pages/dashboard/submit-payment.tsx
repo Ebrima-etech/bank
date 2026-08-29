@@ -69,6 +69,12 @@ export default function SubmitPaymentPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
+    // Prevent Enter key from submitting form
+    if (e instanceof KeyboardEvent && e.key === 'Enter' && name !== 'description') {
+      e.preventDefault();
+      return;
+    }
+
     // When relationship changes to "Self", auto-fill payer info
     if (name === 'payer_relationship' && value === 'Self') {
       setFormData((prev) => ({
@@ -82,6 +88,14 @@ export default function SubmitPaymentPage() {
         ...prev,
         [name]: name === 'amount' ? parseFloat(value) : value,
       }));
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    // Only allow Enter in textarea for description
+    if (e.key === 'Enter' && target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
     }
   };
 
@@ -149,14 +163,22 @@ export default function SubmitPaymentPage() {
         submissionData.payer_name = `${submissionData.pilgrim_first_name} ${submissionData.pilgrim_last_name}`;
       }
 
-      await api.post('/bank-payment-submissions/manual-submission/', submissionData);
+      console.log('Submitting payment data:', submissionData);
+
+      const response = await api.post('/bank-payment-submissions/manual-submission/', submissionData);
+      console.log('Submission response:', response.data);
+
       toast.success('Payment submitted successfully!');
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to submit payment';
+      console.error('Submission error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+
+      const errorMsg = err.response?.data?.error || err.response?.data?.detail || err.message || 'Failed to submit payment';
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -203,6 +225,7 @@ export default function SubmitPaymentPage() {
                         name="pilgrim_first_name"
                         value={formData.pilgrim_first_name}
                         onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         placeholder="e.g., Hassan"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
@@ -218,6 +241,7 @@ export default function SubmitPaymentPage() {
                         name="pilgrim_last_name"
                         value={formData.pilgrim_last_name}
                         onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         placeholder="e.g., Jallow"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
@@ -250,6 +274,7 @@ export default function SubmitPaymentPage() {
                         name="pilgrim_phone"
                         value={formData.pilgrim_phone}
                         onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         placeholder="e.g., +220 3123456"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
@@ -266,6 +291,7 @@ export default function SubmitPaymentPage() {
                       name="pilgrim_email"
                       value={formData.pilgrim_email}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="e.g., hassan@example.com"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                     />
@@ -292,6 +318,7 @@ export default function SubmitPaymentPage() {
                       name="payer_name"
                       value={formData.payer_name}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="Full name of person making deposit"
                       disabled={formData.payer_relationship === 'Self'}
                       readOnly={formData.payer_relationship === 'Self'}
@@ -311,6 +338,7 @@ export default function SubmitPaymentPage() {
                       name="payer_contact"
                       value={formData.payer_contact}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="Phone, ID, or account number"
                       disabled={formData.payer_relationship === 'Self'}
                       readOnly={formData.payer_relationship === 'Self'}
@@ -358,6 +386,7 @@ export default function SubmitPaymentPage() {
                       name="amount"
                       value={formData.amount}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="0.00"
                       step="0.01"
                       min="0"
@@ -375,6 +404,7 @@ export default function SubmitPaymentPage() {
                       name="payment_date"
                       value={formData.payment_date}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                     />
@@ -491,6 +521,7 @@ export default function SubmitPaymentPage() {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="Any additional notes about this payment..."
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
