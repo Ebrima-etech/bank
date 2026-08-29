@@ -37,9 +37,17 @@ export default function StaffManagementPage() {
 
   const checkAuthorization = async () => {
     try {
-      const rolesResponse = await api.get('/user-roles/?role=bank_admin');
+      // Get current user
+      const meResponse = await api.get('/auth/me/');
+      const currentUser = meResponse.data;
+
+      // Check if THIS user is a bank admin
+      const rolesResponse = await api.get(`/user-roles/?user=${currentUser.id}&role=bank_admin`);
       const adminRoles = rolesResponse.data.results || rolesResponse.data;
-      if (adminRoles.length > 0) {
+
+      const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === currentUser.id);
+
+      if (isCurrentUserAdmin) {
         setAuthorized(true);
         fetchStaff();
       } else {
@@ -48,6 +56,7 @@ export default function StaffManagementPage() {
       }
     } catch (error) {
       console.error('Error checking authorization:', error);
+      toast.error('Authorization check failed');
       router.push('/dashboard');
     }
   };

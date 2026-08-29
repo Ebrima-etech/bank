@@ -29,10 +29,11 @@ export default function BankDashboardPage() {
         const userData = await getBankUser();
         setUser(userData);
 
-        // Check if user is bank staff
-        const rolesResponse = await api.get('/user-roles/?role=bank_staff');
+        // Check if THIS user is bank staff (not just any staff exists)
+        const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_staff`);
         const staffRoles = rolesResponse.data.results || rolesResponse.data;
-        setIsStaff(staffRoles.length > 0);
+        const isCurrentUserStaff = staffRoles.some((role: any) => role.user?.id === userData.id);
+        setIsStaff(isCurrentUserStaff);
       } catch (error) {
         console.error('Error checking user role:', error);
       }

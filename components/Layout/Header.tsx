@@ -17,12 +17,14 @@ export default function Header() {
         const userData = await getBankUser();
         setUser(userData);
 
-        // Check if user is bank admin
+        // Check if THIS specific user is a bank admin
         try {
-          const rolesResponse = await api.get('/user-roles/?role=bank_admin');
+          const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_admin`);
           const adminRoles = rolesResponse.data.results || rolesResponse.data;
-          setIsAdmin(adminRoles.length > 0);
+          const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === userData.id);
+          setIsAdmin(isCurrentUserAdmin);
         } catch (error) {
+          console.error('Error checking user role:', error);
           setIsAdmin(false);
         }
       } catch (error) {
