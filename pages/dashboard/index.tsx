@@ -85,7 +85,7 @@ export default function BankDashboardPage() {
       });
 
       console.log('DEBUG: After date filter:', data.length);
-      console.log('DEBUG: Sample records submitted_by_user values:', data.slice(0, 3).map(s => s.submitted_by_user));
+      console.log('DEBUG: Sample records submitted_by_user values:', data.slice(0, 3).map((s: BankPaymentSubmission) => s.submitted_by_user));
 
       // Tellers can only see their own records
       // If NOT an admin (i.e., they're a teller), filter to show only their records
