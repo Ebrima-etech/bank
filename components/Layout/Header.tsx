@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { bankLogout, getBankUser, BankUser } from '@/lib/auth';
+import { BiChevronDown, BiLogOut } from 'react-icons/bi';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -16,7 +17,6 @@ export default function Header() {
   const [user, setUser] = useState<BankUser | null>(null);
   const [bank, setBank] = useState<Bank | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,88 +56,86 @@ export default function Header() {
 
   const handleLogout = () => {
     bankLogout();
-    toast.success('Logged out successfully');
+    toast.success('Logged out');
     router.push('/login');
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            {bank?.logo ? (
-              <img src={bank.logo} alt={bank.name} className="h-8 w-8 object-contain" />
-            ) : (
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">🏦</span>
-              </div>
-            )}
-            <span className="hidden sm:inline font-bold text-lg text-gray-900">
-              {bank?.name || 'Bank Portal'}
+    <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+      <div className="h-16 px-8 flex items-center justify-between">
+        {/* Logo and Bank Name */}
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          {bank?.logo ? (
+            <img src={bank.logo} alt={bank.name} className="h-10 w-10 object-contain" />
+          ) : (
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow">
+              🏦
+            </div>
+          )}
+          <div className="hidden sm:flex flex-col">
+            <p className="text-sm font-semibold text-slate-900">{bank?.name || 'Bank Portal'}</p>
+            <p className="text-xs text-slate-500">Payment Processing</p>
+          </div>
+        </Link>
+
+        {/* Center Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          <Link href="/dashboard">
+            <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              router.pathname === '/dashboard'
+                ? 'text-blue-700 bg-blue-50'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}>
+              Dashboard
             </span>
           </Link>
+          <Link href="/dashboard/submit-payment">
+            <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              router.pathname === '/dashboard/submit-payment'
+                ? 'text-blue-700 bg-blue-50'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}>
+              Submit Payment
+            </span>
+          </Link>
+          {isAdmin && (
+            <Link href="/dashboard/staff">
+              <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                router.pathname === '/dashboard/staff'
+                  ? 'text-blue-700 bg-blue-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}>
+                Staff
+              </span>
+            </Link>
+          )}
+        </nav>
 
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-          >
+        {/* User Section */}
+        <div className="flex items-center gap-4">
+          {user && (
+            <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-slate-200">
+              <div className="flex flex-col text-right">
+                <p className="text-sm font-medium text-slate-900">{user.username}</p>
+                <p className="text-xs text-slate-500">{user.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                title="Sign out"
+                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <BiLogOut size={18} />
+              </button>
+            </div>
+          )}
+
+          {/* Mobile menu button */}
+          <button className="md:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900">
-              Dashboard
-            </Link>
-            <Link href="/dashboard/submit-payment" className="text-sm text-gray-700 hover:text-gray-900">
-              Submit Payment
-            </Link>
-            {isAdmin && (
-              <Link href="/dashboard/staff" className="text-sm text-gray-700 hover:text-gray-900">
-                Staff
-              </Link>
-            )}
-            {user && (
-              <>
-                <div className="text-right border-l border-gray-200 pl-6">
-                  <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
-                >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
         </div>
-
-        {menuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
-            <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-              Dashboard
-            </Link>
-            <Link href="/dashboard/submit-payment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-              Submit Payment
-            </Link>
-            {isAdmin && (
-              <Link href="/dashboard/staff" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                Staff Management
-              </Link>
-            )}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-              >
-                Logout
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </header>
   );
