@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Loading from '@/components/Common/Loading';
 import Button from '@/components/Common/Button';
+import { DashboardSkeleton, StatCardSkeleton } from '@/components/Common/Skeleton';
 import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
@@ -86,7 +87,7 @@ export default function BankDashboardPage() {
     }
   };
 
-  if (loading) return <Layout><Loading /></Layout>;
+  if (loading) return <Layout><div className="min-h-screen bg-white p-8"><DashboardSkeleton /></div></Layout>;
 
   const statCards = [
     { icon: BiListUl, label: 'Total Submissions', value: stats.total, color: 'text-gray-600' },
