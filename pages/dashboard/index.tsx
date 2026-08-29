@@ -136,7 +136,7 @@ export default function BankDashboardPage() {
               {bank && (
                 <>
                   {bank.logo ? (
-                    <img src={bank.logo} alt={bank.name} className="h-12 w-12 object-contain" />
+                    <img src={bank.logo.startsWith('http') ? bank.logo : `https://igaa.onrender.com${bank.logo}`} alt={bank.name} className="h-12 w-12 object-contain" />
                   ) : (
                     <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-lg">🏦</div>
                   )}
