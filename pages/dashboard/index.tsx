@@ -9,7 +9,7 @@ import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiArrowRight } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight } from 'react-icons/bi';
 
 interface Bank {
   id: number;
@@ -191,7 +191,7 @@ export default function BankDashboardPage() {
               <p className="text-gray-500 text-sm">No submissions yet</p>
               <Link href="/dashboard/submit-payment">
                 <span className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 mt-3 cursor-pointer font-medium">
-                  Create one now <BiArrowRight size={14} />
+                  Create one now <BiChevronRight size={14} />
                 </span>
               </Link>
             </div>
