@@ -81,20 +81,8 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
     setLoading(true);
     try {
       const depositData = {
-        // Auto-fill pilgrim info from lookup
-        pilgrim_first_name: pilgrimData.first_name || '',
-        pilgrim_last_name: pilgrimData.last_name || '',
-        pilgrim_gender: pilgrimData.gender || 'M',
-        pilgrim_phone: pilgrimData.phone || '',
-        pilgrim_email: pilgrimData.email || '',
-        pilgrim_date_of_birth: pilgrimData.date_of_birth || '1990-01-01',
-        pilgrim_nationality: pilgrimData.nationality || 'Gambian',
-        pilgrim_passport_number: pilgrimData.passport_number || 'UNKNOWN',
-        pilgrim_address: pilgrimData.address || 'Not provided',
-        pilgrim_city: pilgrimData.city || 'Banjul',
-        pilgrim_state: pilgrimData.state || '',
-        pilgrim_postal_code: pilgrimData.postal_code || '',
-        pilgrim_country: pilgrimData.country || 'Gambia',
+        // Existing pilgrim ID
+        pilgrim_id: pilgrimData.registration_id,
         // Payer info from form
         payer_name: payerName,
         payer_contact: payerContact,
@@ -106,7 +94,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         description: description || `Quick deposit - ${pilgrimData.registration_id}`,
       };
 
-      await api.post('/bank-payment-submissions/manual_submission/', depositData);
+      await api.post('/bank-payment-submissions/current_submission/', depositData);
       toast.success(`Deposit of ${amount} GMD recorded!`);
       setSuccess(true);
       setTimeout(() => {
