@@ -81,18 +81,21 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
     setLoading(true);
     try {
       const depositData = {
-        pilgrim_first_name: pilgrimData.first_name,
-        pilgrim_last_name: pilgrimData.last_name,
+        // Auto-fill pilgrim info from lookup
+        pilgrim_first_name: pilgrimData.first_name || '',
+        pilgrim_last_name: pilgrimData.last_name || '',
         pilgrim_gender: pilgrimData.gender || 'M',
-        pilgrim_phone: pilgrimData.phone,
+        pilgrim_phone: pilgrimData.phone || '',
         pilgrim_email: pilgrimData.email || '',
+        // Payer info from form
         payer_name: payerName,
         payer_contact: payerContact,
         payer_relationship: payerRelationship,
+        // Deposit details
         amount: parseFloat(amount),
         reference_number: reference,
         payment_date: paymentDate,
-        description: description || `Deposit from existing pilgrim ${pilgrimData.registration_id}`,
+        description: description || `Quick deposit - ${pilgrimData.registration_id}`,
       };
 
       await api.post('/bank-payment-submissions/manual-submission/', depositData);
@@ -200,7 +203,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
 
       {/* Deposit Form */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8">
-        <h3 className="text-xl font-semibold text-gray-900 mb-6">Record Deposit</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-6">Record Quick Deposit</h3>
 
         {error && (
           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -209,6 +212,13 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         )}
 
         <form onSubmit={handleSubmitDeposit} className="space-y-4">
+          {/* Info: Pilgrim details auto-filled from lookup */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+            <p className="text-xs text-gray-600">
+              ✓ Pilgrim info auto-filled from lookup - only enter deposit & payer details below
+            </p>
+          </div>
+
           {/* Payer Information */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <h4 className="text-sm font-semibold text-blue-900 mb-3">Who is making this payment?</h4>
