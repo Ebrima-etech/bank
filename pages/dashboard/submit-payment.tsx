@@ -68,10 +68,21 @@ export default function SubmitPaymentPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'amount' ? parseFloat(value) : value,
-    }));
+
+    // When relationship changes to "Self", auto-fill payer info
+    if (name === 'payer_relationship' && value === 'Self') {
+      setFormData((prev) => ({
+        ...prev,
+        payer_relationship: value,
+        payer_name: `${prev.pilgrim_first_name} ${prev.pilgrim_last_name}`,
+        payer_contact: '',
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: name === 'amount' ? parseFloat(value) : value,
+      }));
+    }
   };
 
   const handleGenerateReference = () => {
@@ -240,6 +251,14 @@ export default function SubmitPaymentPage() {
 
               {currentStep === 1 && (
                 <div className="space-y-4">
+                  {formData.payer_relationship === 'Self' && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-emerald-800">
+                        ✓ <strong>Auto-filled:</strong> Payer information is automatically filled with pilgrim details for Self payments.
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Payer Name *
@@ -250,8 +269,12 @@ export default function SubmitPaymentPage() {
                       value={formData.payer_name}
                       onChange={handleInputChange}
                       placeholder="Full name of person making deposit"
+                      disabled={formData.payer_relationship === 'Self'}
+                      readOnly={formData.payer_relationship === 'Self'}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none ${
+                        formData.payer_relationship === 'Self' ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
                     />
                   </div>
 
@@ -265,7 +288,11 @@ export default function SubmitPaymentPage() {
                       value={formData.payer_contact}
                       onChange={handleInputChange}
                       placeholder="Phone, ID, or account number"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      disabled={formData.payer_relationship === 'Self'}
+                      readOnly={formData.payer_relationship === 'Self'}
+                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none ${
+                        formData.payer_relationship === 'Self' ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
                     />
                   </div>
 
