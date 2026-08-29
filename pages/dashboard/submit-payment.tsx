@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import PaymentStepsForm from '@/components/PaymentStepsForm';
+import CurrentDepositForm from '@/components/CurrentDepositForm';
 import Alert from '@/components/Common/Alert';
 import api from '@/lib/api';
 import { generateReference } from '@/lib/utils';
@@ -51,6 +52,7 @@ export default function SubmitPaymentPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [depositType, setDepositType] = useState<'first' | 'current' | null>(null);
   const [formData, setFormData] = useState<PaymentFormData>({
     pilgrim_first_name: '',
     pilgrim_last_name: '',
@@ -186,23 +188,85 @@ export default function SubmitPaymentPage() {
     }
   };
 
+  // Show deposit type selector if not yet chosen
+  if (!depositType) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center p-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-lg p-8 max-w-md w-full">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">New Payment</h2>
+            <p className="text-gray-600 mb-8">What type of deposit is this?</p>
+
+            <div className="space-y-4">
+              {/* First Deposit Option */}
+              <button
+                onClick={() => setDepositType('first')}
+                className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">🆕 First Deposit</h3>
+                <p className="text-sm text-gray-600">New pilgrim making their first payment</p>
+                <p className="text-xs text-emerald-600 mt-2 font-medium">Fill in pilgrim & payer details</p>
+              </button>
+
+              {/* Current Deposit Option */}
+              <button
+                onClick={() => setDepositType('current')}
+                className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">💳 Current Deposit</h3>
+                <p className="text-sm text-gray-600">Existing pilgrim adding to their account</p>
+                <p className="text-xs text-blue-600 mt-2 font-medium">Quick lookup by ID or phone</p>
+              </button>
+            </div>
+
+            {/* Back Button */}
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="w-full mt-6 px-4 py-2 text-gray-600 hover:text-gray-900 text-sm font-medium"
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Submit Payment</h1>
-          <p className="text-gray-600 mt-1">Step-by-step payment submission</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {depositType === 'first' ? '🆕 First Deposit' : '💳 Current Deposit'}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {depositType === 'first'
+                ? 'Register new pilgrim and record payment'
+                : 'Quick deposit for existing pilgrim'}
+            </p>
+          </div>
+          <button
+            onClick={() => setDepositType(null)}
+            className="text-gray-500 hover:text-gray-700"
+            title="Change deposit type"
+          >
+            ✕
+          </button>
         </div>
 
         {success && (
           <Alert type="success" message="Payment submitted successfully! Redirecting..." />
         )}
 
-        {/* Form */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8">
-          <form onSubmit={handleSubmit}>
-            <PaymentStepsForm
+        {/* Form - Show based on deposit type */}
+        {depositType === 'current' ? (
+          <CurrentDepositForm onBack={() => setDepositType(null)} />
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8">
+            <form onSubmit={handleSubmit}>
+              <PaymentStepsForm
               steps={formSteps}
               currentStep={currentStep}
               onNext={handleNextStep}
@@ -536,20 +600,21 @@ export default function SubmitPaymentPage() {
                   </div>
                 </div>
               )}
-            </PaymentStepsForm>
-          </form>
-        </div>
+              </PaymentStepsForm>
+            </form>
+          </div>
 
-        {/* Info Box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm font-semibold text-blue-900 mb-2">💡 Important:</p>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• All pilgrim information will be recorded with this payment</li>
-            <li>• Payer information helps track the payment source</li>
-            <li>• Reference number must be unique for each transaction</li>
-            <li>• All amounts are in Gambian Dalasi (GMD)</li>
-          </ul>
-        </div>
+          {/* Info Box */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-blue-900 mb-2">💡 Important:</p>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• All pilgrim information will be recorded with this payment</li>
+              <li>• Payer information helps track the payment source</li>
+              <li>• Reference number must be unique for each transaction</li>
+              <li>• All amounts are in Gambian Dalasi (GMD)</li>
+            </ul>
+          </div>
+        )}
       </div>
     </Layout>
   );
