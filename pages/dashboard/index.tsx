@@ -24,6 +24,7 @@ export default function BankDashboardPage() {
   const [user, setUser] = useState<BankUser | null>(null);
   const [bank, setBank] = useState<Bank | null>(null);
   const [isStaff, setIsStaff] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
@@ -60,7 +61,7 @@ export default function BankDashboardPage() {
     };
 
     initializePage();
-  }, []);
+  }, [selectedDate]);
 
   const fetchSubmissions = async () => {
     try {
@@ -68,9 +69,17 @@ export default function BankDashboardPage() {
       const response = await api.get('/bank-payment-submissions/');
       let data = response.data.results || response.data;
 
+      // Filter by date (YYYY-MM-DD format)
+      data = data.filter((sub: BankPaymentSubmission) => {
+        const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
+        return submissionDate === selectedDate;
+      });
+
+      // Tellers can only see their own records
       if (isStaff && user) {
         data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === user.username);
       }
+      // Admins can see all records (already filtered by date above)
 
       setSubmissions(data);
 
@@ -117,7 +126,16 @@ export default function BankDashboardPage() {
                 </>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3 items-center">
+              <div className="flex flex-col">
+                <label className="text-xs font-medium text-gray-600 mb-1">Filter by Date</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
               <Link href="/dashboard/submit-payment">
                 <Button className="flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">
                   <BiPlus size={16} /> Manual Payment
