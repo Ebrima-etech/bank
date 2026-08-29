@@ -23,7 +23,7 @@ export default function BankDashboardPage() {
   const [submissions, setSubmissions] = useState<BankPaymentSubmission[]>([]);
   const [user, setUser] = useState<BankUser | null>(null);
   const [bank, setBank] = useState<Bank | null>(null);
-  const [isStaff, setIsStaff] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [stats, setStats] = useState({
     total: 0,
@@ -49,10 +49,10 @@ export default function BankDashboardPage() {
           console.error('Error fetching bank:', error);
         }
 
-        const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_staff`);
-        const staffRoles = rolesResponse.data.results || rolesResponse.data;
-        const isCurrentUserStaff = staffRoles.some((role: any) => role.user?.id === userData.id);
-        setIsStaff(isCurrentUserStaff);
+        const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_admin`);
+        const adminRoles = rolesResponse.data.results || rolesResponse.data;
+        const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === userData.id);
+        setIsAdmin(isCurrentUserAdmin);
       } catch (error) {
         console.error('Error checking user role:', error);
       }
@@ -76,7 +76,8 @@ export default function BankDashboardPage() {
       });
 
       // Tellers can only see their own records
-      if (isStaff && user) {
+      // If NOT an admin (i.e., they're a teller), filter to show only their records
+      if (!isAdmin && user) {
         data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === user.username);
       }
       // Admins can see all records (already filtered by date above)
