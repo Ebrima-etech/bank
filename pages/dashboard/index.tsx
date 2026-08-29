@@ -53,24 +53,28 @@ export default function BankDashboardPage() {
         const adminRoles = rolesResponse.data.results || rolesResponse.data;
         const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === userData.id);
         setIsAdmin(isCurrentUserAdmin);
+
+        // Pass isCurrentUserAdmin directly to avoid race condition
+        await fetchSubmissions(isCurrentUserAdmin, userData);
       } catch (error) {
         console.error('Error checking user role:', error);
       }
-
-      await fetchSubmissions();
     };
 
     initializePage();
   }, [selectedDate]);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (isAdminUser?: boolean, currentUser?: BankUser) => {
     try {
       setLoading(true);
       const response = await api.get('/bank-payment-submissions/');
       let data = response.data.results || response.data;
 
+      const username = currentUser?.username || user?.username;
+      const isAdmin = isAdminUser !== undefined ? isAdminUser : isAdmin;
+
       console.log('DEBUG: All submissions fetched:', data.length);
-      console.log('DEBUG: Current user:', user?.username);
+      console.log('DEBUG: Current user:', username);
       console.log('DEBUG: Is admin:', isAdmin);
       console.log('DEBUG: Selected date:', selectedDate);
 
@@ -85,11 +89,11 @@ export default function BankDashboardPage() {
 
       // Tellers can only see their own records
       // If NOT an admin (i.e., they're a teller), filter to show only their records
-      if (!isAdmin && user) {
-        console.log('DEBUG: Applying teller filter for user:', user.username);
+      if (!isAdmin && username) {
+        console.log('DEBUG: Applying teller filter for user:', username);
         data = data.filter((sub: BankPaymentSubmission) => {
-          const match = sub.submitted_by_user === user.username;
-          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${user.username} => ${match}`);
+          const match = sub.submitted_by_user === username;
+          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${username} => ${match}`);
           return match;
         });
         console.log('DEBUG: After user filter:', data.length);
