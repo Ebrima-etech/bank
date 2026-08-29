@@ -117,6 +117,12 @@ export default function SubmitPaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Only allow submission from the final review step
+    if (currentStep !== formSteps.length - 1) {
+      return;
+    }
+
     setError('');
 
     // Validation
