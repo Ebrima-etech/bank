@@ -124,7 +124,8 @@ export default function SubmitPaymentPage() {
       setError('Pilgrim first and last name are required');
       return;
     }
-    if (!formData.payer_name.trim()) {
+    // For "Self", payer_name is auto-filled; for others, it's required
+    if (formData.payer_relationship !== 'Self' && !formData.payer_name.trim()) {
       setError('Payer name is required');
       return;
     }
@@ -136,7 +137,13 @@ export default function SubmitPaymentPage() {
     setLoading(true);
 
     try {
-      await api.post('/bank-payment-submissions/manual-submission/', formData);
+      // Ensure payer_name is filled for "Self"
+      const submissionData = { ...formData };
+      if (submissionData.payer_relationship === 'Self') {
+        submissionData.payer_name = `${submissionData.pilgrim_first_name} ${submissionData.pilgrim_last_name}`;
+      }
+
+      await api.post('/bank-payment-submissions/manual-submission/', submissionData);
       toast.success('Payment submitted successfully!');
       setSuccess(true);
       setTimeout(() => {
