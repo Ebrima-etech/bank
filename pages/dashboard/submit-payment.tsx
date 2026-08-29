@@ -14,6 +14,14 @@ interface PaymentFormData {
   pilgrim_gender: 'M' | 'F';
   pilgrim_phone: string;
   pilgrim_email: string;
+  pilgrim_date_of_birth: string;
+  pilgrim_nationality: string;
+  pilgrim_passport_number: string;
+  pilgrim_address: string;
+  pilgrim_city: string;
+  pilgrim_state: string;
+  pilgrim_postal_code: string;
+  pilgrim_country: string;
   payer_name: string;
   payer_contact: string;
   payer_relationship: string;
@@ -59,6 +67,14 @@ export default function SubmitPaymentPage() {
     pilgrim_gender: 'M',
     pilgrim_phone: '',
     pilgrim_email: '',
+    pilgrim_date_of_birth: '',
+    pilgrim_nationality: 'Gambian',
+    pilgrim_passport_number: '',
+    pilgrim_address: '',
+    pilgrim_city: '',
+    pilgrim_state: '',
+    pilgrim_postal_code: '',
+    pilgrim_country: 'Gambia',
     payer_name: '',
     payer_contact: '',
     payer_relationship: 'Self',
@@ -144,6 +160,30 @@ export default function SubmitPaymentPage() {
     // Validation
     if (!formData.pilgrim_first_name.trim() || !formData.pilgrim_last_name.trim()) {
       setError('Pilgrim first and last name are required');
+      return;
+    }
+    if (!formData.pilgrim_date_of_birth) {
+      setError('Date of birth is required');
+      return;
+    }
+    if (!formData.pilgrim_nationality.trim()) {
+      setError('Nationality is required');
+      return;
+    }
+    if (!formData.pilgrim_passport_number.trim()) {
+      setError('Passport number is required');
+      return;
+    }
+    if (!formData.pilgrim_address.trim()) {
+      setError('Address is required');
+      return;
+    }
+    if (!formData.pilgrim_city.trim()) {
+      setError('City is required');
+      return;
+    }
+    if (!formData.pilgrim_country.trim()) {
+      setError('Country is required');
       return;
     }
     // For "Self", payer_name is auto-filled; for others, it's required
@@ -280,6 +320,7 @@ export default function SubmitPaymentPage() {
               >
               {currentStep === 0 && (
                 <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -317,6 +358,20 @@ export default function SubmitPaymentPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Date of Birth *
+                      </label>
+                      <input
+                        type="date"
+                        name="pilgrim_date_of_birth"
+                        value={formData.pilgrim_date_of_birth}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
                         Gender *
                       </label>
                       <select
@@ -329,7 +384,9 @@ export default function SubmitPaymentPage() {
                         <option value="F">Aja (Female)</option>
                       </select>
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         Phone *
@@ -345,21 +402,139 @@ export default function SubmitPaymentPage() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="pilgrim_email"
+                        value={formData.pilgrim_email}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., hassan@example.com"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-4">Document & Location</h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Passport Number *
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_passport_number"
+                        value={formData.pilgrim_passport_number}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., GM123456"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Nationality *
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_nationality"
+                        value={formData.pilgrim_nationality}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., Gambian"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Email
+                      Address *
                     </label>
                     <input
-                      type="email"
-                      name="pilgrim_email"
-                      value={formData.pilgrim_email}
+                      type="text"
+                      name="pilgrim_address"
+                      value={formData.pilgrim_address}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      placeholder="e.g., hassan@example.com"
+                      placeholder="Street address"
+                      required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        City *
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_city"
+                        value={formData.pilgrim_city}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., Banjul"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        State/Region
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_state"
+                        value={formData.pilgrim_state}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Optional"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Country *
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_country"
+                        value={formData.pilgrim_country}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., Gambia"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Postal Code
+                      </label>
+                      <input
+                        type="text"
+                        name="pilgrim_postal_code"
+                        value={formData.pilgrim_postal_code}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Optional"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
