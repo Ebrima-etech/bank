@@ -224,7 +224,7 @@ export default function SubmitPaymentPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Email *
+                      Email
                     </label>
                     <input
                       type="email"
@@ -232,7 +232,6 @@ export default function SubmitPaymentPage() {
                       value={formData.pilgrim_email}
                       onChange={handleInputChange}
                       placeholder="e.g., hassan@example.com"
-                      required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                     />
                   </div>
@@ -273,6 +272,9 @@ export default function SubmitPaymentPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Relationship to Pilgrim
+                      {formData.payer_relationship === 'Self' && (
+                        <span className="ml-2 text-xs font-normal text-emerald-600">✓ Auto-filled as Self</span>
+                      )}
                     </label>
                     <select
                       name="payer_relationship"
@@ -280,7 +282,7 @@ export default function SubmitPaymentPage() {
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer"
                     >
-                      <option value="Self">Self</option>
+                      <option value="Self">Self (Pilgrim themselves)</option>
                       <option value="Parent">Parent</option>
                       <option value="Spouse">Spouse</option>
                       <option value="Child">Child</option>
@@ -354,31 +356,82 @@ export default function SubmitPaymentPage() {
 
               {currentStep === 3 && (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm font-semibold text-blue-900 mb-3">Review Summary:</p>
-                    <div className="space-y-2 text-sm text-blue-700">
-                      <p>
-                        <strong>Pilgrim:</strong> {formData.pilgrim_first_name} {formData.pilgrim_last_name}{' '}
-                        ({formData.pilgrim_gender === 'M' ? 'Alagie' : 'Aja'})
-                      </p>
-                      <p>
-                        <strong>Contact:</strong> {formData.pilgrim_email} • {formData.pilgrim_phone}
-                      </p>
-                      <p>
-                        <strong>Payer:</strong> {formData.payer_name} ({formData.payer_relationship})
-                      </p>
-                      <p>
-                        <strong>Amount:</strong> {formData.amount} GMD
-                      </p>
-                      <p>
-                        <strong>Date:</strong> {formData.payment_date}
-                      </p>
-                      <p>
-                        <strong>Reference:</strong> {formData.reference_number}
-                      </p>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Please review all details below. Once submitted, this payment will be recorded in the system.
+                  </p>
+
+                  {/* Pilgrim Information Review */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Pilgrim Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600">Full Name</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.pilgrim_first_name} {formData.pilgrim_last_name}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Gender</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.pilgrim_gender === 'M' ? 'Alagie (Male)' : 'Aja (Female)'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Phone</p>
+                        <p className="font-medium text-gray-900">{formData.pilgrim_phone}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Email</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.pilgrim_email || '(Not provided)'}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Payer Information Review */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Payer Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="col-span-2">
+                        <p className="text-gray-600">Payer Name</p>
+                        <p className="font-medium text-gray-900">{formData.payer_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Contact/ID</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.payer_contact || '(Not provided)'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Relationship</p>
+                        <p className="font-medium text-gray-900">{formData.payer_relationship}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Details Review */}
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Payment Details</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600">Amount</p>
+                        <p className="font-mono font-bold text-emerald-700 text-lg">
+                          {formData.amount} GMD
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Payment Date</p>
+                        <p className="font-medium text-gray-900">{formData.payment_date}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-gray-600">Reference Number</p>
+                        <p className="font-mono font-medium text-gray-900">{formData.reference_number}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Notes */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Additional Notes (Optional)
@@ -391,6 +444,13 @@ export default function SubmitPaymentPage() {
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                     />
+                  </div>
+
+                  {/* Final Confirmation */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p className="text-sm text-amber-900">
+                      <strong>⚠️ Confirmation:</strong> By clicking Submit Payment, you confirm that all information above is accurate and complete.
+                    </p>
                   </div>
                 </div>
               )}
