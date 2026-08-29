@@ -23,7 +23,17 @@ export interface BankPaymentSubmission {
 }
 
 export interface ManualPaymentData {
-  pilgrim_id: string;
+  // Pilgrim Information
+  pilgrim_first_name: string;
+  pilgrim_last_name: string;
+  pilgrim_gender: 'M' | 'F';
+  pilgrim_phone: string;
+  pilgrim_email: string;
+  // Payer Information
+  payer_name: string;
+  payer_contact?: string;
+  payer_relationship?: string;
+  // Payment Information
   amount: number;
   reference_number: string;
   payment_date: string;
