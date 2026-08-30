@@ -421,8 +421,8 @@ export default function BankDashboardPage() {
             <div className="flex items-center gap-4">
               <img src="https://strapi.yolcu360.com/gambia_airlines_logo_1_ebe63e51ad.png" alt="GIA Hajj" className="h-48 w-48 object-contain" />
               <div>
-                <h1 className="text-3xl font-semibold text-gray-900">GIA Hajj</h1>
-                <p className="text-sm text-gray-600 mt-1">Serving the Guests of Allah</p>
+                <h1 className="text-3xl font-semibold text-emerald-700">GIA Hajj</h1>
+                <p className="text-sm text-emerald-600 mt-1">Serving the Guests of Allah</p>
               </div>
             </div>
             <div className="flex gap-3 items-center flex-wrap">
