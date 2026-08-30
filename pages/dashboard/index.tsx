@@ -419,6 +419,7 @@ export default function BankDashboardPage() {
         <div className="mb-8 pb-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <img src="https://strapi.yolcu360.com/gambia_airlines_logo_1_ebe63e51ad.png" alt="GIA Hajj" className="h-16 w-16 object-contain" />
               <div>
                 <h1 className="text-3xl font-semibold text-gray-900">GIA Hajj</h1>
                 <p className="text-sm text-gray-600 mt-1">Serving the Guests of Allah</p>
