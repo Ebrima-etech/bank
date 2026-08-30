@@ -17,6 +17,10 @@ interface Bank {
   name: string;
   logo?: string | null;
   is_active?: boolean;
+  access_restricted?: boolean;
+  allowed_days?: string;
+  access_start_time?: string;
+  access_end_time?: string;
   location_restricted?: boolean;
   location_latitude?: number;
   location_longitude?: number;
@@ -31,6 +35,7 @@ export default function BankDashboardPage() {
   const [bank, setBank] = useState<Bank | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [bankInactive, setBankInactive] = useState(false);
+  const [timeRestricted, setTimeRestricted] = useState(false);
   const [locationRestricted, setLocationRestricted] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -55,6 +60,33 @@ export default function BankDashboardPage() {
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
+  };
+
+  const checkTimeAccess = (bankData: Bank): boolean => {
+    // If time restrictions are not enabled, allow access
+    if (!bankData.access_restricted) {
+      return true;
+    }
+
+    const now = new Date();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const currentDay = dayNames[now.getDay()];
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+
+    // Check if today is an allowed day
+    const allowedDays = bankData.allowed_days?.split(',').map(d => d.trim()) || [];
+    if (!allowedDays.includes(currentDay)) {
+      return false;
+    }
+
+    // Check if current time is within allowed range
+    if (bankData.access_start_time && bankData.access_end_time) {
+      if (currentTime < bankData.access_start_time || currentTime > bankData.access_end_time) {
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const checkLocationAccess = async (bankData: Bank) => {
@@ -124,6 +156,14 @@ export default function BankDashboardPage() {
             // Check if bank is inactive
             if (bankResponse.data.is_active === false) {
               setBankInactive(true);
+              setLoading(false);
+              return;
+            }
+
+            // Check time-based access restrictions
+            const hasTimeAccess = checkTimeAccess(bankResponse.data);
+            if (!hasTimeAccess) {
+              setTimeRestricted(true);
               setLoading(false);
               return;
             }
@@ -268,6 +308,49 @@ export default function BankDashboardPage() {
               className="w-full px-4 py-2 bg-black hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
             >
               Return to Home
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (timeRestricted) {
+    const now = new Date();
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDay = dayNames[now.getDay()];
+    const currentTime = now.toTimeString().slice(0, 5);
+    return (
+      <Layout>
+        <div className="min-h-screen bg-white p-8 flex items-center justify-center">
+          <div className="max-w-md w-full text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+                <span className="text-3xl">⏰</span>
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Outside Business Hours</h1>
+            <p className="text-gray-600 mb-2">
+              {bank?.name ? `${bank.name}'s portal` : 'The portal'} is only available during specific business hours.
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              Please access the portal during the authorized days and times set by your administrator.
+            </p>
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-6">
+              <p className="text-sm text-amber-700 font-medium mb-2">
+                Current: {currentDay} at {currentTime}
+              </p>
+              {bank?.access_restricted && bank?.access_start_time && bank?.access_end_time && (
+                <p className="text-xs text-amber-600">
+                  Authorized: {bank.allowed_days} • {bank.access_start_time} - {bank.access_end_time}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-black hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Check Again
             </button>
           </div>
         </div>
