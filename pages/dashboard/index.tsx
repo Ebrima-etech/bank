@@ -28,6 +28,7 @@ export default function BankDashboardPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedTeller, setSelectedTeller] = useState('');
   const [tellers, setTellers] = useState<any[]>([]);
+  const [paymentAccessLevel, setPaymentAccessLevel] = useState<'date_restricted' | 'unrestricted'>('date_restricted');
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
@@ -47,6 +48,7 @@ export default function BankDashboardPage() {
           if (userRoles.length > 0 && userRoles[0].bank) {
             const bankResponse = await api.get(`/banks/${userRoles[0].bank.id}/`);
             setBank(bankResponse.data);
+            setPaymentAccessLevel(bankResponse.data.payment_view_access || 'date_restricted');
           }
         } catch (error) {
           console.error('Error fetching bank:', error);
@@ -94,14 +96,18 @@ export default function BankDashboardPage() {
       console.log('DEBUG: Current user:', username);
       console.log('DEBUG: Is admin:', isAdmin);
       console.log('DEBUG: Selected date:', selectedDate);
+      console.log('DEBUG: Access level:', paymentAccessLevel);
 
-      // Filter by date (YYYY-MM-DD format)
-      data = data.filter((sub: BankPaymentSubmission) => {
-        const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
-        return submissionDate === selectedDate;
-      });
+      // For admins with date_restricted access, apply date filter
+      // For unrestricted access, show all submissions
+      if (isAdmin && paymentAccessLevel === 'date_restricted') {
+        data = data.filter((sub: BankPaymentSubmission) => {
+          const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
+          return submissionDate === selectedDate;
+        });
+      }
 
-      console.log('DEBUG: After date filter:', data.length);
+      console.log('DEBUG: After access level filter:', data.length);
 
       // Filter by teller if admin selected one
       if (isAdmin && selectedTeller) {
@@ -170,15 +176,22 @@ export default function BankDashboardPage() {
             <div className="flex gap-3 items-center flex-wrap">
               {isAdmin && (
                 <>
-                  <div className="flex flex-col">
-                    <label className="text-xs font-medium text-gray-600 mb-1">Filter by Date</label>
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  {paymentAccessLevel === 'date_restricted' ? (
+                    <div className="flex flex-col">
+                      <label className="text-xs font-medium text-gray-600 mb-1">🔒 Filter by Date (Required)</label>
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col bg-emerald-50 border border-emerald-200 p-3 rounded-lg">
+                      <p className="text-xs font-medium text-emerald-700">🔓 Unrestricted Access</p>
+                      <p className="text-xs text-emerald-600">Viewing all payments - no date restriction</p>
+                    </div>
+                  )}
                   <div className="flex flex-col">
                     <label className="text-xs font-medium text-gray-600 mb-1">Filter by Teller</label>
                     <select
