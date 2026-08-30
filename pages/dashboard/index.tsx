@@ -419,19 +419,10 @@ export default function BankDashboardPage() {
         <div className="mb-8 pb-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {bank && (
-                <>
-                  {bank.logo ? (
-                    <img src={bank.logo.startsWith('http') ? bank.logo : `https://igaa.onrender.com${bank.logo}`} alt={bank.name} className="h-12 w-12 object-contain" />
-                  ) : (
-                    <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-lg">🏦</div>
-                  )}
-                  <div>
-                    <h1 className="text-3xl font-semibold text-gray-900">{bank.name}</h1>
-                    <p className="text-sm text-gray-600 mt-1">Payment Processing Dashboard</p>
-                  </div>
-                </>
-              )}
+              <div>
+                <h1 className="text-3xl font-semibold text-gray-900">GIA Hajj</h1>
+                <p className="text-sm text-gray-600 mt-1">Serving the Guests of Allah</p>
+              </div>
             </div>
             <div className="flex gap-3 items-center flex-wrap">
               {isAdmin && (
