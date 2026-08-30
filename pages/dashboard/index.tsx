@@ -10,7 +10,7 @@ import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide, BiCog } from 'react-icons/bi';
 
 interface Bank {
   id: number;
@@ -477,6 +477,11 @@ export default function BankDashboardPage() {
               <Link href="/dashboard/bulk-upload">
                 <Button className="flex items-center gap-2 border border-gray-300 text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium">
                   <BiUpload size={16} /> Bulk Upload
+                </Button>
+              </Link>
+              <Link href="/dashboard/settings">
+                <Button className="flex items-center gap-2 border border-gray-300 text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium">
+                  <BiCog size={16} /> Settings
                 </Button>
               </Link>
             </div>
