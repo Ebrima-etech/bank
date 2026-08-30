@@ -21,10 +21,13 @@ interface Bank {
 export default function BankDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<BankPaymentSubmission[]>([]);
+  const [allSubmissions, setAllSubmissions] = useState<BankPaymentSubmission[]>([]);
   const [user, setUser] = useState<BankUser | null>(null);
   const [bank, setBank] = useState<Bank | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedTeller, setSelectedTeller] = useState('');
+  const [tellers, setTellers] = useState<any[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
@@ -54,6 +57,9 @@ export default function BankDashboardPage() {
         const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === userData.id);
         setIsAdmin(isCurrentUserAdmin);
 
+        // Fetch tellers for filter
+        await fetchTellers();
+
         // Pass isCurrentUserAdmin directly to avoid race condition
         await fetchSubmissions(isCurrentUserAdmin, userData);
       } catch (error) {
@@ -62,13 +68,24 @@ export default function BankDashboardPage() {
     };
 
     initializePage();
-  }, [selectedDate]);
+  }, [selectedDate, selectedTeller]);
+
+  const fetchTellers = async () => {
+    try {
+      const response = await api.get('/user-roles/?role=bank_staff');
+      const tellersList = response.data.results || response.data;
+      setTellers(tellersList);
+    } catch (error) {
+      console.error('Error fetching tellers:', error);
+    }
+  };
 
   const fetchSubmissions = async (isAdminUser?: boolean, currentUser?: BankUser) => {
     try {
       setLoading(true);
       const response = await api.get('/bank-payment-submissions/');
       let data = response.data.results || response.data;
+      setAllSubmissions(data);
 
       const username = currentUser?.username || user?.username;
       const isAdmin = isAdminUser !== undefined ? isAdminUser : isAdmin;
@@ -85,7 +102,11 @@ export default function BankDashboardPage() {
       });
 
       console.log('DEBUG: After date filter:', data.length);
-      console.log('DEBUG: Sample records submitted_by_user values:', data.slice(0, 3).map((s: BankPaymentSubmission) => s.submitted_by_user));
+
+      // Filter by teller if admin selected one
+      if (isAdmin && selectedTeller) {
+        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === selectedTeller);
+      }
 
       // Tellers can only see their own records
       // If NOT an admin (i.e., they're a teller), filter to show only their records
@@ -100,7 +121,6 @@ export default function BankDashboardPage() {
       } else {
         console.log('DEBUG: Admin user, showing all records');
       }
-      // Admins can see all records (already filtered by date above)
 
       setSubmissions(data);
 
@@ -147,17 +167,34 @@ export default function BankDashboardPage() {
                 </>
               )}
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 items-center flex-wrap">
               {isAdmin && (
-                <div className="flex flex-col">
-                  <label className="text-xs font-medium text-gray-600 mb-1">Filter by Date</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+                <>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-medium text-gray-600 mb-1">Filter by Date</label>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-xs font-medium text-gray-600 mb-1">Filter by Teller</label>
+                    <select
+                      value={selectedTeller}
+                      onChange={(e) => setSelectedTeller(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                    >
+                      <option value="">All Tellers</option>
+                      {tellers.map((teller) => (
+                        <option key={teller.id} value={teller.user.username}>
+                          @{teller.user.username}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
               )}
               <Link href="/dashboard/submit-payment">
                 <Button className="flex items-center gap-2 bg-black hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -205,6 +242,7 @@ export default function BankDashboardPage() {
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">ID</th>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Amount</th>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+                    {isAdmin && <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Teller</th>}
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Date</th>
                   </tr>
                 </thead>
@@ -222,6 +260,7 @@ export default function BankDashboardPage() {
                           {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
                         </span>
                       </td>
+                      {isAdmin && <td className="px-6 py-3.5 text-sm font-medium text-gray-700">@{sub.submitted_by_user || 'N/A'}</td>}
                       <td className="px-6 py-3.5 text-sm text-gray-600">{formatDate(sub.submitted_at)}</td>
                     </tr>
                   ))}

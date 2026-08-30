@@ -24,6 +24,7 @@ export default function StaffManagementPage() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -40,6 +41,7 @@ export default function StaffManagementPage() {
       // Get current user
       const meResponse = await api.get('/auth/me/');
       const currentUser = meResponse.data;
+      setCurrentUserId(currentUser.id);
 
       // Check if THIS user is a bank admin
       const rolesResponse = await api.get(`/user-roles/?user=${currentUser.id}&role=bank_admin`);
@@ -65,7 +67,10 @@ export default function StaffManagementPage() {
     try {
       setLoading(true);
       const response = await api.get('/user-roles/?role=bank_staff');
-      setStaff(response.data.results || response.data);
+      let staffList = response.data.results || response.data;
+      // Filter out the current logged-in user - admins should not see themselves
+      staffList = staffList.filter((member: StaffMember) => member.user.id !== currentUserId);
+      setStaff(staffList);
     } catch (error) {
       console.error('Error fetching staff:', error);
       toast.error('Failed to load staff');
