@@ -419,7 +419,7 @@ export default function BankDashboardPage() {
         <div className="mb-8 pb-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src="https://strapi.yolcu360.com/gambia_airlines_logo_1_ebe63e51ad.png" alt="GIA Hajj" className="h-16 w-16 object-contain" />
+              <img src="https://scontent-lis1-1.cdninstagram.com/v/t51.2885-19/461990420_1251047309579353_2066952290984790475_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=105&ccb=7-5&_nc_sid=f7ccc5&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=14nZ5oSsAuUQ7kNvwEzuaXB&_nc_oc=AdrQG9qacZA59LcDDGZwkr0BBgYylPutcig3uBqhzVWU0Bqn8yUXWuoHDkBRZqjC8f0&_nc_zt=24&_nc_ht=scontent-lis1-1.cdninstagram.com&_nc_ss=7a689&oh=00_AQJu20uEMXEf061AkWQPIBulsFNbQ4XKi6w7hcnSiqM7ng&oe=6A9A4E58" alt="GIA Hajj" className="h-16 w-16 object-contain rounded-lg" />
               <div>
                 <h1 className="text-3xl font-semibold text-gray-900">GIA Hajj</h1>
                 <p className="text-sm text-gray-600 mt-1">Serving the Guests of Allah</p>
