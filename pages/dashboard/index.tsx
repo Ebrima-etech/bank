@@ -10,12 +10,17 @@ import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide } from 'react-icons/bi';
 
 interface Bank {
   id: number;
   name: string;
   logo?: string | null;
+  is_active?: boolean;
+  location_restricted?: boolean;
+  location_latitude?: number;
+  location_longitude?: number;
+  location_radius?: number;
 }
 
 export default function BankDashboardPage() {
@@ -25,16 +30,82 @@ export default function BankDashboardPage() {
   const [user, setUser] = useState<BankUser | null>(null);
   const [bank, setBank] = useState<Bank | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [bankInactive, setBankInactive] = useState(false);
+  const [locationRestricted, setLocationRestricted] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedTeller, setSelectedTeller] = useState('');
   const [tellers, setTellers] = useState<any[]>([]);
   const [paymentAccessLevel, setPaymentAccessLevel] = useState<'date_restricted' | 'unrestricted'>('date_restricted');
+  const [hiddenFields, setHiddenFields] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
     verified: 0,
     pending: 0,
   });
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const checkLocationAccess = async (bankData: Bank) => {
+    // If location restrictions are not enabled, allow access
+    if (!bankData.location_restricted) {
+      return true;
+    }
+
+    // Get user's current location
+    return new Promise((resolve) => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            setUserLocation({ lat: userLat, lng: userLng });
+
+            // Check if user is within allowed radius
+            if (bankData.location_latitude && bankData.location_longitude && bankData.location_radius) {
+              const distance = calculateDistance(
+                userLat,
+                userLng,
+                bankData.location_latitude,
+                bankData.location_longitude
+              );
+
+              const isWithinRadius = distance <= bankData.location_radius;
+              if (!isWithinRadius) {
+                setLocationRestricted(true);
+                setLoading(false);
+              }
+              resolve(isWithinRadius);
+            } else {
+              resolve(true);
+            }
+          },
+          () => {
+            // Geolocation failed - deny access if location restrictions are enabled
+            setLocationRestricted(true);
+            setLoading(false);
+            resolve(false);
+          }
+        );
+      } else {
+        // Geolocation not available - deny access if location restrictions are enabled
+        setLocationRestricted(true);
+        setLoading(false);
+        resolve(false);
+      }
+    });
+  };
 
   useEffect(() => {
     const initializePage = async () => {
@@ -49,6 +120,19 @@ export default function BankDashboardPage() {
             const bankResponse = await api.get(`/banks/${userRoles[0].bank.id}/`);
             setBank(bankResponse.data);
             setPaymentAccessLevel(bankResponse.data.payment_view_access || 'date_restricted');
+
+            // Check if bank is inactive
+            if (bankResponse.data.is_active === false) {
+              setBankInactive(true);
+              setLoading(false);
+              return;
+            }
+
+            // Check location restrictions
+            const hasLocationAccess = await checkLocationAccess(bankResponse.data);
+            if (!hasLocationAccess) {
+              return;
+            }
           }
         } catch (error) {
           console.error('Error fetching bank:', error);
@@ -71,6 +155,18 @@ export default function BankDashboardPage() {
 
     initializePage();
   }, [selectedDate, selectedTeller]);
+
+  const toggleFieldVisibility = (fieldId: string) => {
+    const newHidden = new Set(hiddenFields);
+    if (newHidden.has(fieldId)) {
+      newHidden.delete(fieldId);
+    } else {
+      newHidden.add(fieldId);
+    }
+    setHiddenFields(newHidden);
+  };
+
+  const isFieldHidden = (fieldId: string) => hiddenFields.has(fieldId);
 
   const fetchTellers = async () => {
     try {
@@ -145,11 +241,92 @@ export default function BankDashboardPage() {
 
   if (loading) return <Layout><div className="min-h-screen bg-white p-8"><DashboardSkeleton /></div></Layout>;
 
+  if (bankInactive) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-white p-8 flex items-center justify-center">
+          <div className="max-w-md w-full text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                <span className="text-3xl">🔒</span>
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+            <p className="text-gray-600 mb-2">
+              {bank?.name ? `${bank.name} has been` : 'Your bank has been'} marked as <span className="font-semibold">inactive</span>.
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              Bank staff and administrators cannot access the portal while the bank is inactive. Please contact GIA for assistance.
+            </p>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-6">
+              <p className="text-sm text-red-700 font-medium">
+                ⚠️ Status: <span className="font-bold">INACTIVE</span>
+              </p>
+            </div>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full px-4 py-2 bg-black hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (locationRestricted) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-white p-8 flex items-center justify-center">
+          <div className="max-w-md w-full text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                <span className="text-3xl">📍</span>
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Location Access Denied</h1>
+            <p className="text-gray-600 mb-2">
+              {bank?.name ? `${bank.name}'s portal` : 'The portal'} requires access from a specific geographic location.
+            </p>
+            <p className="text-gray-500 text-sm mb-8">
+              Your current location is outside the allowed access zone. Please move to the authorized location and try again.
+            </p>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-6">
+              {userLocation ? (
+                <>
+                  <p className="text-sm text-red-700 font-medium mb-2">
+                    Your Location: {userLocation.lat.toFixed(4)}°, {userLocation.lng.toFixed(4)}°
+                  </p>
+                  {bank?.location_latitude && bank?.location_longitude && bank?.location_radius && (
+                    <p className="text-xs text-red-600">
+                      Authorized: {bank.location_latitude.toFixed(4)}°, {bank.location_longitude.toFixed(4)}° (±{bank.location_radius}km radius)
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-red-700 font-medium">
+                  ⚠️ Unable to determine your location
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-black hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   const statCards = [
-    { icon: BiListUl, label: 'Total Submissions', value: stats.total, color: 'text-gray-600' },
-    { icon: BiDollar, label: 'Total Amount', value: formatCurrency(stats.amount), color: 'text-gray-600' },
-    { icon: BiCheckCircle, label: 'Verified', value: stats.verified, color: 'text-emerald-600' },
-    { icon: BiHourglass, label: 'Pending', value: stats.pending, color: 'text-amber-600' },
+    { icon: BiListUl, label: 'Total Submissions', value: stats.total, color: 'text-gray-600', isFinancial: false },
+    { icon: BiDollar, label: 'Total Amount', value: stats.amount, color: 'text-gray-600', isFinancial: true, fieldId: 'total-amount' },
+    { icon: BiCheckCircle, label: 'Verified', value: stats.verified, color: 'text-emerald-600', isFinancial: false },
+    { icon: BiHourglass, label: 'Pending', value: stats.pending, color: 'text-amber-600', isFinancial: false },
   ];
 
   return (
@@ -230,9 +407,22 @@ export default function BankDashboardPage() {
             return (
               <div key={idx} className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">{stat.label}</p>
-                    <p className={`text-2xl font-bold ${stat.color} mt-3 font-mono`}>{stat.value}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">{stat.label}</p>
+                      {stat.isFinancial && (
+                        <button
+                          onClick={() => toggleFieldVisibility(stat.fieldId)}
+                          className="p-1 hover:bg-gray-200 rounded transition-colors"
+                          title={isFieldHidden(stat.fieldId) ? 'Show' : 'Hide'}
+                        >
+                          {isFieldHidden(stat.fieldId) ? <BiHide size={14} className="text-gray-600" /> : <BiShow size={14} className="text-gray-600" />}
+                        </button>
+                      )}
+                    </div>
+                    <p className={`text-2xl font-bold ${stat.color} mt-3 font-mono`}>
+                      {stat.isFinancial && isFieldHidden(stat.fieldId) ? '••••••' : (stat.isFinancial ? formatCurrency(stat.value as number) : stat.value)}
+                    </p>
                   </div>
                   <Icon size={20} className="text-gray-400" />
                 </div>
@@ -263,7 +453,18 @@ export default function BankDashboardPage() {
                   {submissions.slice(0, 10).map((sub, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-3.5 text-sm font-mono text-gray-500">#{sub.id}</td>
-                      <td className="px-6 py-3.5 text-sm font-mono font-medium text-gray-900">{formatCurrency(sub.amount)}</td>
+                      <td className="px-6 py-3.5 text-sm font-mono font-medium text-gray-900">
+                        <div className="flex items-center justify-between gap-2">
+                          <span>{isFieldHidden(`submission-${sub.id}`) ? '••••••' : formatCurrency(sub.amount)}</span>
+                          <button
+                            onClick={() => toggleFieldVisibility(`submission-${sub.id}`)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                            title={isFieldHidden(`submission-${sub.id}`) ? 'Show' : 'Hide'}
+                          >
+                            {isFieldHidden(`submission-${sub.id}`) ? <BiHide size={14} className="text-gray-600" /> : <BiShow size={14} className="text-gray-600" />}
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-6 py-3.5 text-sm">
                         <span className={`px-2.5 py-1 rounded text-xs font-medium inline-block ${
                           sub.status === 'verified'
