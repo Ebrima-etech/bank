@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { bankLogin } from '@/lib/auth';
+import { bankLogin, getBankUser, isBankUser } from '@/lib/auth';
 import Button from '@/components/Common/Button';
 import toast from 'react-hot-toast';
 
@@ -18,6 +18,18 @@ export default function BankLoginPage() {
 
     try {
       await bankLogin(username, password);
+
+      // Check if user is bank staff/admin
+      const user = await getBankUser();
+      const isBank = await isBankUser(user.id);
+
+      if (!isBank) {
+        // GIA staff trying to access bank portal - show wrong credentials
+        setError('Invalid credentials. Please check your username and password.');
+        toast.error('Invalid credentials');
+        return;
+      }
+
       toast.success('Login successful!');
       router.push('/dashboard');
     } catch (err) {
