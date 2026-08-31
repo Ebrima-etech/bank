@@ -59,6 +59,7 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
 
   useEffect(() => {
     fetchSignatorySettings();
+    storeReceipt();
   }, []);
 
   const fetchSignatorySettings = async () => {
@@ -80,6 +81,35 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
     } catch (error) {
       console.warn('Failed to load signatory settings:', error);
       // Use defaults if fetch fails
+    }
+  };
+
+  const storeReceipt = async () => {
+    try {
+      const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
+
+      const receiptPayload = {
+        payment: null, // Will be linked later if needed
+        signatory: signatory.id,
+        receipt_number: receiptNumber,
+        pilgrim_first_name: data.pilgrim_first_name,
+        pilgrim_last_name: data.pilgrim_last_name,
+        pilgrim_email: data.pilgrim_email || '',
+        pilgrim_phone: data.pilgrim_phone || '',
+        pilgrim_passport: data.pilgrim_passport_number || '',
+        pilgrim_dob: data.pilgrim_date_of_birth || '',
+        pilgrim_gender: data.pilgrim_gender,
+        payer_name: data.payer_name,
+        payer_relationship: data.payer_relationship || '',
+        amount: data.amount,
+        payment_date: data.payment_date,
+      };
+
+      await api.post('/receipts/', receiptPayload);
+      console.log('Receipt stored successfully:', receiptNumber);
+    } catch (error) {
+      console.warn('Failed to store receipt:', error);
+      // Don't throw error - receipt display should work even if storage fails
     }
   };
 
