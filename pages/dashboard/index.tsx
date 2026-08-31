@@ -54,21 +54,25 @@ export default function BankDashboardPage() {
   });
 
   const handleOpenReceipt = (submission: BankPaymentSubmission) => {
+    console.log('Opening receipt for submission:', submission);
+
     const receiptData = {
-      pilgrim_first_name: submission.pilgrim?.first_name || 'N/A',
-      pilgrim_last_name: submission.pilgrim?.last_name || 'N/A',
-      pilgrim_phone: submission.pilgrim?.phone_number || 'N/A',
-      pilgrim_email: submission.pilgrim?.email || 'N/A',
-      pilgrim_passport_number: submission.pilgrim?.passport_number || 'N/A',
-      pilgrim_date_of_birth: submission.pilgrim?.date_of_birth || 'N/A',
-      pilgrim_gender: submission.pilgrim?.gender || 'M',
+      pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || '',
+      pilgrim_last_name: submission.pilgrim_last_name || submission.pilgrim?.last_name || '',
+      pilgrim_phone: submission.pilgrim_phone || submission.pilgrim?.phone_number || '',
+      pilgrim_email: submission.pilgrim_email || submission.pilgrim?.email || '',
+      pilgrim_passport_number: submission.pilgrim_passport_number || submission.pilgrim?.passport_number || '',
+      pilgrim_date_of_birth: submission.pilgrim_date_of_birth || submission.pilgrim?.date_of_birth || '',
+      pilgrim_gender: submission.pilgrim_gender || submission.pilgrim?.gender || 'M',
       amount: submission.amount,
       reference_number: submission.reference_number || `REF${submission.id}`,
       payment_date: formatDate(submission.submitted_at),
       registration_id: `REC${submission.id}`,
-      payer_name: submission.payer_name || 'N/A',
-      payer_relationship: submission.payer_relationship || 'N/A',
+      payer_name: submission.payer_name || '',
+      payer_relationship: submission.payer_relationship || '',
     };
+
+    console.log('Receipt data:', receiptData);
     setSelectedReceipt(receiptData);
   };
 
