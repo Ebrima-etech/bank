@@ -154,11 +154,25 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       console.log('Receipt saved successfully:', receiptNumber);
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
-      console.error('Error details:', error.response?.data);
-      const errorMsg = error.response?.data?.detail ||
-                       Object.values(error.response?.data || {}).flat().join(', ') ||
-                       error.message ||
-                       'Failed to save receipt';
+      console.error('Error response:', error.response);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+
+      let errorMsg = 'Failed to save receipt';
+
+      if (error.response?.status === 500) {
+        errorMsg = 'Server error (500). Check backend logs.';
+      } else if (typeof error.response?.data === 'string') {
+        errorMsg = 'Server error: ' + error.response.data.substring(0, 200);
+      } else if (error.response?.data?.detail) {
+        errorMsg = error.response.data.detail;
+      } else if (error.response?.data) {
+        const errors = Object.values(error.response.data).flat();
+        errorMsg = errors.join(', ') || error.message;
+      } else {
+        errorMsg = error.message || 'Failed to save receipt';
+      }
+
       alert(`Failed to save receipt: ${errorMsg}`);
     } finally {
       setSavingReceipt(false);
