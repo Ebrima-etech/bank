@@ -57,9 +57,11 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
     bank_contact_phone: '+220 XXX XXXX',
   });
 
+  const [receiptSaved, setReceiptSaved] = useState(false);
+  const [savingReceipt, setSavingReceipt] = useState(false);
+
   useEffect(() => {
     fetchSignatorySettings();
-    storeReceipt();
   }, []);
 
   const fetchSignatorySettings = async () => {
@@ -84,12 +86,13 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
     }
   };
 
-  const storeReceipt = async () => {
+  const handleSaveReceipt = async () => {
     try {
+      setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
       const receiptPayload = {
-        payment: null, // Will be linked later if needed
+        payment: null,
         signatory: signatory.id,
         receipt_number: receiptNumber,
         pilgrim_first_name: data.pilgrim_first_name,
@@ -106,10 +109,13 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
       };
 
       await api.post('/receipts/', receiptPayload);
-      console.log('Receipt stored successfully:', receiptNumber);
+      setReceiptSaved(true);
+      console.log('Receipt saved successfully:', receiptNumber);
     } catch (error) {
-      console.warn('Failed to store receipt:', error);
-      // Don't throw error - receipt display should work even if storage fails
+      console.warn('Failed to save receipt:', error);
+      alert('Failed to save receipt. Please try again.');
+    } finally {
+      setSavingReceipt(false);
     }
   };
 
@@ -128,6 +134,20 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between print:hidden">
           <h2 className="text-xl font-bold text-gray-900">Payment Receipt</h2>
           <div className="flex items-center gap-2">
+            {!receiptSaved && (
+              <button
+                onClick={handleSaveReceipt}
+                disabled={savingReceipt}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingReceipt ? 'Saving...' : 'Save Receipt'}
+              </button>
+            )}
+            {receiptSaved && (
+              <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-sm">
+                ✓ Receipt Saved
+              </div>
+            )}
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"

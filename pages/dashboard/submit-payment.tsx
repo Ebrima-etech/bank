@@ -272,7 +272,6 @@ export default function SubmitPaymentPage() {
 
       toast.success('Payment submitted successfully!');
       setSuccess(true);
-      setShowReceipt(true);
     } catch (err: any) {
       console.error('Submission error:', err);
       console.error('Error response:', err.response?.data);
@@ -393,7 +392,18 @@ export default function SubmitPaymentPage() {
         </div>
 
         {success && (
-          <Alert type="success" message="Payment submitted successfully! Redirecting..." />
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-emerald-900">Payment Submitted Successfully!</h3>
+              <p className="text-sm text-emerald-700 mt-1">Click the button below to generate a receipt</p>
+            </div>
+            <button
+              onClick={() => setShowReceipt(true)}
+              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap ml-4"
+            >
+              Generate Receipt
+            </button>
+          </div>
         )}
 
         {/* Form - Show based on deposit type */}
