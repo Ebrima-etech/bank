@@ -152,7 +152,7 @@ export default function SubmitPaymentPage() {
     }
   };
 
-  // Fetch active Hajj Year and set amount on component mount
+  // Fetch active Hajj Year and set first deposit amount on component mount
   useEffect(() => {
     const fetchHajjYear = async () => {
       try {
@@ -160,7 +160,7 @@ export default function SubmitPaymentPage() {
         const hajjYears = response.data.results || response.data;
         if (hajjYears.length > 0) {
           const activeYear = hajjYears[0];
-          const amount = parseFloat(activeYear.total_package_fee) || 0;
+          const amount = parseFloat(activeYear.first_deposit_amount) || 0;
           setHajjYearAmount(amount);
           setFormData((prev) => ({
             ...prev,
@@ -788,7 +788,7 @@ export default function SubmitPaymentPage() {
                   {hajjYearAmount > 0 && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
                       <p className="text-sm text-emerald-800">
-                        <strong>Auto-populated Amount:</strong> The amount is automatically set based on the current Hajj year package fee.
+                        <strong>Auto-populated Amount:</strong> The first deposit amount is automatically set based on the current Hajj year configuration.
                       </p>
                     </div>
                   )}
@@ -813,7 +813,7 @@ export default function SubmitPaymentPage() {
                     />
                     {hajjYearAmount > 0 && (
                       <p className="text-xs text-gray-500 mt-2">
-                        Amount is set from Hajj year configuration: {hajjYearAmount} GMD
+                        First deposit amount from active Hajj year: {hajjYearAmount} GMD
                       </p>
                     )}
                   </div>
