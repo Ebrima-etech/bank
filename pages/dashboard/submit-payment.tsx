@@ -235,6 +235,11 @@ export default function SubmitPaymentPage() {
         submissionData.payer_name = `${submissionData.pilgrim_first_name} ${submissionData.pilgrim_last_name}`;
       }
 
+      // Provide default city if not filled (backend requirement)
+      if (!submissionData.pilgrim_city.trim()) {
+        submissionData.pilgrim_city = submissionData.pilgrim_region || 'Banjul';
+      }
+
       console.log('Submitting payment data:', submissionData);
 
       const response = await api.post('/bank-payment-submissions/manual_submission/', submissionData);
