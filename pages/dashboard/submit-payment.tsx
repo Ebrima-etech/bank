@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import PaymentStepsForm from '@/components/PaymentStepsForm';
 import CurrentDepositForm from '@/components/CurrentDepositForm';
+import ReceiptModal from '@/components/ReceiptModal';
 import Alert from '@/components/Common/Alert';
 import { PaymentFormSkeleton, DashboardSkeleton } from '@/components/Common/Skeleton';
 import api from '@/lib/api';
@@ -87,6 +88,7 @@ export default function SubmitPaymentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [depositType, setDepositType] = useState<'first' | 'current' | null>(null);
   const [hajjYearAmount, setHajjYearAmount] = useState<number>(0);
@@ -270,9 +272,7 @@ export default function SubmitPaymentPage() {
 
       toast.success('Payment submitted successfully!');
       setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+      setShowReceipt(true);
     } catch (err: any) {
       console.error('Submission error:', err);
       console.error('Error response:', err.response?.data);
@@ -1031,6 +1031,17 @@ export default function SubmitPaymentPage() {
               </ul>
             </div>
           </div>
+        )}
+
+        {/* Receipt Modal */}
+        {showReceipt && success && (
+          <ReceiptModal
+            data={formData}
+            onClose={() => {
+              setShowReceipt(false);
+              router.push('/dashboard');
+            }}
+          />
         )}
       </div>
     </Layout>
