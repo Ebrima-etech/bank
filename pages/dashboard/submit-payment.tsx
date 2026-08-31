@@ -22,9 +22,6 @@ interface PaymentFormData {
   pilgrim_region: string;
   pilgrim_passport_number: string;
   pilgrim_address: string;
-  pilgrim_city: string;
-  pilgrim_state: string;
-  pilgrim_postal_code: string;
   pilgrim_country: string;
   second_contact_name: string;
   second_contact_phone: string;
@@ -101,9 +98,6 @@ export default function SubmitPaymentPage() {
     pilgrim_region: '',
     pilgrim_passport_number: '',
     pilgrim_address: '',
-    pilgrim_city: '',
-    pilgrim_state: '',
-    pilgrim_postal_code: '',
     pilgrim_country: 'Gambia',
     second_contact_name: '',
     second_contact_phone: '',
@@ -210,10 +204,6 @@ export default function SubmitPaymentPage() {
     }
     if (!formData.pilgrim_address.trim()) {
       setError('Address is required');
-      return;
-    }
-    if (!formData.pilgrim_city.trim()) {
-      setError('City is required');
       return;
     }
     if (!formData.pilgrim_country.trim()) {
@@ -563,87 +553,37 @@ export default function SubmitPaymentPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        City *
-                      </label>
-                      <input
-                        type="text"
-                        name="pilgrim_city"
-                        value={formData.pilgrim_city}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="e.g., Banjul"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Region
-                      </label>
-                      <select
-                        name="pilgrim_region"
-                        value={formData.pilgrim_region}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
-                      >
-                        <option value="">Select a region</option>
-                        {GAMBIAN_REGIONS.map((region) => (
-                          <option key={region} value={region}>
-                            {region}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        State/Province
-                      </label>
-                      <input
-                        type="text"
-                        name="pilgrim_state"
-                        value={formData.pilgrim_state}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Optional"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Country *
-                      </label>
-                      <input
-                        type="text"
-                        name="pilgrim_country"
-                        value={formData.pilgrim_country}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="e.g., Gambia"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Region
+                    </label>
+                    <select
+                      name="pilgrim_region"
+                      value={formData.pilgrim_region}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
+                    >
+                      <option value="">Select a region</option>
+                      {GAMBIAN_REGIONS.map((region) => (
+                        <option key={region} value={region}>
+                          {region}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Postal Code
+                      Country *
                     </label>
                     <input
                       type="text"
-                      name="pilgrim_postal_code"
-                      value={formData.pilgrim_postal_code}
+                      name="pilgrim_country"
+                      value={formData.pilgrim_country}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      placeholder="Optional"
+                      placeholder="e.g., Gambia"
+                      required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
