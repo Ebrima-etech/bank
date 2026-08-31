@@ -93,18 +93,24 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
+      // Clean up data - convert 'N/A' to empty strings
+      const cleanValue = (val: any) => {
+        if (val === 'N/A' || !val) return '';
+        return val;
+      };
+
       const receiptPayload = {
         signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
-        pilgrim_first_name: data.pilgrim_first_name,
-        pilgrim_last_name: data.pilgrim_last_name,
-        pilgrim_email: data.pilgrim_email || '',
-        pilgrim_phone: data.pilgrim_phone || '',
-        pilgrim_passport: data.pilgrim_passport_number || '',
-        pilgrim_dob: data.pilgrim_date_of_birth || '',
-        pilgrim_gender: data.pilgrim_gender,
-        payer_name: data.payer_name,
-        payer_relationship: data.payer_relationship || '',
+        pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
+        pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
+        pilgrim_email: cleanValue(data.pilgrim_email),
+        pilgrim_phone: cleanValue(data.pilgrim_phone),
+        pilgrim_passport: cleanValue(data.pilgrim_passport_number),
+        pilgrim_dob: cleanValue(data.pilgrim_date_of_birth),
+        pilgrim_gender: data.pilgrim_gender || 'M',
+        payer_name: cleanValue(data.payer_name) || 'Unknown',
+        payer_relationship: cleanValue(data.payer_relationship),
         amount: data.amount,
         payment_date: data.payment_date,
       };
@@ -116,7 +122,11 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       console.log('Receipt saved successfully:', receiptNumber);
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
-      const errorMsg = error.response?.data?.detail || error.response?.data?.signatory?.[0] || error.message || 'Failed to save receipt';
+      console.error('Error details:', error.response?.data);
+      const errorMsg = error.response?.data?.detail ||
+                       Object.values(error.response?.data || {}).flat().join(', ') ||
+                       error.message ||
+                       'Failed to save receipt';
       alert(`Failed to save receipt: ${errorMsg}`);
     } finally {
       setSavingReceipt(false);
