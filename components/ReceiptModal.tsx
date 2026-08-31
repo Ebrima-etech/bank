@@ -18,12 +18,19 @@ interface ReceiptData {
   payer_relationship: string;
 }
 
-interface SignatorySettings {
+interface Signatory {
+  id: number;
   signatory_name: string;
   signatory_title: string;
   digital_signature?: string;
   official_stamp?: string;
   stamp_color: string;
+  email: string;
+  phone: string;
+  is_active: boolean;
+}
+
+interface GlobalSettings {
   bank_contact_email: string;
   bank_contact_phone: string;
 }
@@ -34,10 +41,17 @@ interface ReceiptModalProps {
 }
 
 export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
-  const [signatory, setSignatory] = useState<SignatorySettings>({
+  const [signatory, setSignatory] = useState<Signatory>({
+    id: 0,
     signatory_name: 'GIA Bank Admin',
     signatory_title: 'Bank Administrator',
     stamp_color: '#16a34a',
+    email: 'support@giabanking.gm',
+    phone: '+220 XXX XXXX',
+    is_active: false,
+  });
+
+  const [globalSettings, setGlobalSettings] = useState<GlobalSettings>({
     bank_contact_email: 'support@giabanking.gm',
     bank_contact_phone: '+220 XXX XXXX',
   });
@@ -56,6 +70,13 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
         if (activeSignatory) {
           setSignatory(activeSignatory);
         }
+      }
+
+      // Also fetch global settings
+      const settingsResponse = await fetch('/api/v1/settings/signatory/');
+      if (settingsResponse.ok) {
+        const settings = await settingsResponse.json();
+        setGlobalSettings(settings);
       }
     } catch (error) {
       console.warn('Failed to load signatory settings:', error);
@@ -271,9 +292,9 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
           <div className="text-center py-6 border-t-2 border-gray-400 mt-8">
             <p className="text-xs text-gray-600 font-semibold">OFFICIAL PAYMENT RECEIPT</p>
             <p className="text-xs text-gray-500 mt-2">This is an officially signed digital receipt from GIA Bank Portal</p>
-            <p className="text-xs text-gray-500">For inquiries, contact: {signatory.bank_contact_email}</p>
-            {signatory.bank_contact_phone && (
-              <p className="text-xs text-gray-500">Phone: {signatory.bank_contact_phone}</p>
+            <p className="text-xs text-gray-500">For inquiries, contact: {globalSettings.bank_contact_email}</p>
+            {globalSettings.bank_contact_phone && (
+              <p className="text-xs text-gray-500">Phone: {globalSettings.bank_contact_phone}</p>
             )}
             <p className="text-xs text-gray-500 mt-3 print:block hidden">
               Document ID: {registrationId} | Generated: {currentTime.toLocaleString('en-GM')}
