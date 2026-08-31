@@ -41,9 +41,19 @@ interface PaymentFormData {
 
 const formSteps = [
   {
-    id: 'pilgrim-info',
-    title: 'Pilgrim Information',
-    description: 'Enter the pilgrim details for this payment',
+    id: 'basic-info',
+    title: 'Basic Information',
+    description: 'Enter pilgrim name, contact, and personal details',
+  },
+  {
+    id: 'document-location',
+    title: 'Document & Location',
+    description: 'Passport, address, and region information',
+  },
+  {
+    id: 'second-contact',
+    title: 'Second Contact',
+    description: 'Backup contact person information',
   },
   {
     id: 'payer-info',
@@ -380,9 +390,10 @@ export default function SubmitPaymentPage() {
                 error={error}
                 isLastStep={currentStep === formSteps.length - 1}
               >
+              {/* Step 0: Basic Information */}
               {currentStep === 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Details</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -481,44 +492,27 @@ export default function SubmitPaymentPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="pilgrim_email"
-                        value={formData.pilgrim_email}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="e.g., hassan@example.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Region
-                      </label>
-                      <select
-                        name="pilgrim_region"
-                        value={formData.pilgrim_region}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
-                      >
-                        <option value="">Select a region</option>
-                        {GAMBIAN_REGIONS.map((region) => (
-                          <option key={region} value={region}>
-                            {region}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="pilgrim_email"
+                      value={formData.pilgrim_email}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="e.g., hassan@example.com"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                    />
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-4">Document & Location</h3>
+                </div>
+              )}
 
+              {/* Step 1: Document & Location */}
+              {currentStep === 1 && (
+                <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -588,7 +582,28 @@ export default function SubmitPaymentPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        State/Region
+                        Region
+                      </label>
+                      <select
+                        name="pilgrim_region"
+                        value={formData.pilgrim_region}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
+                      >
+                        <option value="">Select a region</option>
+                        {GAMBIAN_REGIONS.map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        State/Province
                       </label>
                       <input
                         type="text"
@@ -600,9 +615,7 @@ export default function SubmitPaymentPage() {
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         Country *
@@ -618,29 +631,38 @@ export default function SubmitPaymentPage() {
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Postal Code
-                      </label>
-                      <input
-                        type="text"
-                        name="pilgrim_postal_code"
-                        value={formData.pilgrim_postal_code}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Optional"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-4">Second Contact (Backup)</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Postal Code
+                    </label>
+                    <input
+                      type="text"
+                      name="pilgrim_postal_code"
+                      value={formData.pilgrim_postal_code}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Optional"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Second Contact */}
+              {currentStep === 2 && (
+                <div className="space-y-4">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-emerald-800">
+                      <strong>Backup Contact:</strong> Provide a secondary contact person in case the main pilgrim cannot be reached.
+                    </p>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Second Contact Name
+                        Contact Name
                       </label>
                       <input
                         type="text"
@@ -655,7 +677,7 @@ export default function SubmitPaymentPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Relationship
+                        Relationship to Pilgrim
                       </label>
                       <input
                         type="text"
@@ -663,7 +685,7 @@ export default function SubmitPaymentPage() {
                         value={formData.second_contact_relationship}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder="e.g., Parent, Sibling"
+                        placeholder="e.g., Parent, Sibling, Spouse"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
@@ -672,7 +694,7 @@ export default function SubmitPaymentPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Second Contact Phone
+                        Phone Number
                       </label>
                       <input
                         type="tel"
@@ -687,7 +709,7 @@ export default function SubmitPaymentPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Second Contact WhatsApp
+                        WhatsApp Number
                       </label>
                       <input
                         type="tel"
@@ -700,10 +722,17 @@ export default function SubmitPaymentPage() {
                       />
                     </div>
                   </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-xs text-blue-800">
+                      💡 <strong>Tip:</strong> You can skip this if the backup contact info is not available yet. It can be added later.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {currentStep === 1 && (
+              {/* Step 3: Payer Information */}
+              {currentStep === 3 && (
                 <div className="space-y-4">
                   {formData.payer_relationship === 'Self' && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4">
@@ -779,7 +808,8 @@ export default function SubmitPaymentPage() {
                 </div>
               )}
 
-              {currentStep === 2 && (
+              {/* Step 4: Payment Details */}
+              {currentStep === 4 && (
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -839,7 +869,8 @@ export default function SubmitPaymentPage() {
                 </div>
               )}
 
-              {currentStep === 3 && (
+              {/* Step 5: Review & Submit */}
+              {currentStep === 5 && (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600 mb-6">
                     Please review all details below. Once submitted, this payment will be recorded in the system.
