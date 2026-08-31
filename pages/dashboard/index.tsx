@@ -45,6 +45,7 @@ export default function BankDashboardPage() {
   const [paymentAccessLevel, setPaymentAccessLevel] = useState<'date_restricted' | 'unrestricted'>('date_restricted');
   const [hiddenFields, setHiddenFields] = useState<Set<string>>(new Set());
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [generatedReceipts, setGeneratedReceipts] = useState<Set<number>>(new Set());
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
@@ -69,6 +70,10 @@ export default function BankDashboardPage() {
       payer_relationship: submission.payer_relationship || 'N/A',
     };
     setSelectedReceipt(receiptData);
+  };
+
+  const handleReceiptGenerated = (submissionId: number) => {
+    setGeneratedReceipts(prev => new Set(prev).add(submissionId));
   };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -590,11 +595,15 @@ export default function BankDashboardPage() {
                       <td className="px-6 py-3.5 text-sm">
                         <button
                           onClick={() => handleOpenReceipt(sub)}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-medium transition-colors"
-                          title="View receipt"
+                          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            generatedReceipts.has(sub.id)
+                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                          }`}
+                          title={generatedReceipts.has(sub.id) ? "View receipt" : "Generate receipt"}
                         >
                           <BiReceipt size={16} />
-                          Receipt
+                          {generatedReceipts.has(sub.id) ? 'View Receipt' : 'Generate Receipt'}
                         </button>
                       </td>
                     </tr>
@@ -619,6 +628,16 @@ export default function BankDashboardPage() {
         <ReceiptModal
           data={selectedReceipt}
           onClose={() => setSelectedReceipt(null)}
+          onReceiptSaved={() => {
+            // Find the submission ID from the data and mark it as generated
+            const submissionId = submissions.find(sub =>
+              sub.reference_number === selectedReceipt.reference_number ||
+              sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
+            )?.id;
+            if (submissionId) {
+              handleReceiptGenerated(submissionId);
+            }
+          }}
         />
       )}
     </Layout>

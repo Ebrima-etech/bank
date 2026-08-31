@@ -39,9 +39,10 @@ interface GlobalSettings {
 interface ReceiptModalProps {
   data: ReceiptData;
   onClose: () => void;
+  onReceiptSaved?: () => void;
 }
 
-export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
+export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptModalProps) {
   const [signatory, setSignatory] = useState<Signatory>({
     id: 0,
     signatory_name: 'GIA Bank Admin',
@@ -62,6 +63,7 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
 
   useEffect(() => {
     fetchSignatorySettings();
+    handleSaveReceipt();
   }, []);
 
   const fetchSignatorySettings = async () => {
@@ -110,6 +112,7 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
 
       await api.post('/receipts/', receiptPayload);
       setReceiptSaved(true);
+      onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
     } catch (error) {
       console.warn('Failed to save receipt:', error);
@@ -134,18 +137,10 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between print:hidden">
           <h2 className="text-xl font-bold text-gray-900">Payment Receipt</h2>
           <div className="flex items-center gap-2">
-            {!receiptSaved && (
-              <button
-                onClick={handleSaveReceipt}
-                disabled={savingReceipt}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {savingReceipt ? 'Saving...' : 'Save Receipt'}
-              </button>
-            )}
             {receiptSaved && (
-              <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-sm">
-                ✓ Receipt Saved
+              <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-sm flex items-center gap-2">
+                <span>✓</span>
+                <span>Receipt Saved</span>
               </div>
             )}
             <button
