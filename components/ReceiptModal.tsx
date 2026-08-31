@@ -48,11 +48,14 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
 
   const fetchSignatorySettings = async () => {
     try {
-      // Fetch from GIA backend (adjust URL based on your API setup)
-      const response = await fetch('/api/settings/signatory/');
+      // Fetch active signatory from GIA backend
+      const response = await fetch('/api/signatories/');
       if (response.ok) {
-        const data = await response.json();
-        setSignatory(data);
+        const signatories = await response.json();
+        const activeSignatory = signatories.find((s: any) => s.is_active);
+        if (activeSignatory) {
+          setSignatory(activeSignatory);
+        }
       }
     } catch (error) {
       console.warn('Failed to load signatory settings:', error);
