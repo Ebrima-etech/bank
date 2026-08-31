@@ -1,5 +1,6 @@
 import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import api from '@/lib/api';
 import { useState, useEffect } from 'react';
 
 interface ReceiptData {
@@ -63,20 +64,18 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
   const fetchSignatorySettings = async () => {
     try {
       // Fetch active signatory from GIA backend
-      const response = await fetch('/api/v1/signatories/');
-      if (response.ok) {
-        const signatories = await response.json();
-        const activeSignatory = signatories.find((s: any) => s.is_active);
+      const signatoryResponse = await api.get('/signatories/');
+      if (signatoryResponse.data) {
+        const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
         if (activeSignatory) {
           setSignatory(activeSignatory);
         }
       }
 
       // Also fetch global settings
-      const settingsResponse = await fetch('/api/v1/settings/signatory/');
-      if (settingsResponse.ok) {
-        const settings = await settingsResponse.json();
-        setGlobalSettings(settings);
+      const settingsResponse = await api.get('/settings/signatory/');
+      if (settingsResponse.data) {
+        setGlobalSettings(settingsResponse.data);
       }
     } catch (error) {
       console.warn('Failed to load signatory settings:', error);
