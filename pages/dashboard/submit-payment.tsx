@@ -796,24 +796,31 @@ export default function SubmitPaymentPage() {
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Amount (GMD) *
                     </label>
-                    <input
-                      type="number"
-                      name="amount"
-                      value={formData.amount}
-                      onChange={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      readOnly={hajjYearAmount > 0}
-                      required
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all ${
-                        hajjYearAmount > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
-                      }`}
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        name="amount"
+                        value={formData.amount}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        readOnly={hajjYearAmount > 0}
+                        required
+                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all ${
+                          hajjYearAmount > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                        }`}
+                      />
+                      {formData.amount > 0 && (
+                        <div className="absolute right-4 top-3 text-sm font-semibold text-emerald-600 bg-white px-2 py-1 rounded">
+                          {formatCurrency(formData.amount)}
+                        </div>
+                      )}
+                    </div>
                     {hajjYearAmount > 0 && (
                       <p className="text-xs text-gray-500 mt-2">
-                        First deposit amount from active Hajj year: {hajjYearAmount} GMD
+                        First deposit amount from active Hajj year: {formatCurrency(hajjYearAmount)}
                       </p>
                     )}
                   </div>

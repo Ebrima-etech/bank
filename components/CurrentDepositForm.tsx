@@ -291,16 +291,23 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
             <label className="block text-sm font-semibold text-gray-900 mb-2">
               Amount (GMD) *
             </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-lg font-bold transition"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-lg font-bold transition"
+              />
+              {amount && parseFloat(amount) > 0 && (
+                <div className="absolute right-4 top-3 text-sm font-semibold text-emerald-600 bg-white px-2 py-1 rounded">
+                  {formatCurrency(amount)}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
