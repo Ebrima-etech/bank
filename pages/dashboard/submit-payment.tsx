@@ -467,6 +467,23 @@ export default function SubmitPaymentPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
+                        WhatsApp
+                      </label>
+                      <input
+                        type="tel"
+                        name="pilgrim_whatsapp"
+                        value={formData.pilgrim_whatsapp}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., +220 3123456"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
                         Email
                       </label>
                       <input
@@ -478,6 +495,25 @@ export default function SubmitPaymentPage() {
                         placeholder="e.g., hassan@example.com"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Region
+                      </label>
+                      <select
+                        name="pilgrim_region"
+                        value={formData.pilgrim_region}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer"
+                      >
+                        <option value="">Select a region</option>
+                        {GAMBIAN_REGIONS.map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -594,6 +630,72 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Optional"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-4">Second Contact (Backup)</h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Second Contact Name
+                      </label>
+                      <input
+                        type="text"
+                        name="second_contact_name"
+                        value={formData.second_contact_name}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Full name"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Relationship
+                      </label>
+                      <input
+                        type="text"
+                        name="second_contact_relationship"
+                        value={formData.second_contact_relationship}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., Parent, Sibling"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Second Contact Phone
+                      </label>
+                      <input
+                        type="tel"
+                        name="second_contact_phone"
+                        value={formData.second_contact_phone}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., +220 3123456"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Second Contact WhatsApp
+                      </label>
+                      <input
+                        type="tel"
+                        name="second_contact_whatsapp"
+                        value={formData.second_contact_whatsapp}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g., +220 3123456"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
                       />
                     </div>
@@ -764,13 +866,62 @@ export default function SubmitPaymentPage() {
                         <p className="font-medium text-gray-900">{formData.pilgrim_phone}</p>
                       </div>
                       <div>
+                        <p className="text-gray-600">WhatsApp</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.pilgrim_whatsapp || '(Not provided)'}
+                        </p>
+                      </div>
+                      <div>
                         <p className="text-gray-600">Email</p>
                         <p className="font-medium text-gray-900">
                           {formData.pilgrim_email || '(Not provided)'}
                         </p>
                       </div>
+                      <div>
+                        <p className="text-gray-600">Region</p>
+                        <p className="font-medium text-gray-900">
+                          {formData.pilgrim_region || '(Not provided)'}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-gray-600">Address</p>
+                        <p className="font-medium text-gray-900">{formData.pilgrim_address}</p>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Second Contact Information Review */}
+                  {(formData.second_contact_name || formData.second_contact_phone || formData.second_contact_whatsapp) && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">Second Contact (Backup)</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Name</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.second_contact_name || '(Not provided)'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Relationship</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.second_contact_relationship || '(Not provided)'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Phone</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.second_contact_phone || '(Not provided)'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">WhatsApp</p>
+                          <p className="font-medium text-gray-900">
+                            {formData.second_contact_whatsapp || '(Not provided)'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Payer Information Review */}
                   <div className="bg-white border border-gray-200 rounded-lg p-4">
