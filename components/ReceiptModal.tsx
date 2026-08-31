@@ -49,7 +49,7 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
   const fetchSignatorySettings = async () => {
     try {
       // Fetch active signatory from GIA backend
-      const response = await fetch('/api/signatories/');
+      const response = await fetch('/settings/signatories/');
       if (response.ok) {
         const signatories = await response.json();
         const activeSignatory = signatories.find((s: any) => s.is_active);
