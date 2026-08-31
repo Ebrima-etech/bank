@@ -56,19 +56,29 @@ export default function BankDashboardPage() {
   const handleOpenReceipt = (submission: BankPaymentSubmission) => {
     console.log('Opening receipt for submission:', submission);
 
+    // Format date as YYYY-MM-DD for backend
+    const formatDateForBackend = (dateStr: string) => {
+      if (!dateStr) return new Date().toISOString().split('T')[0];
+      // If already in YYYY-MM-DD format, return as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      // Otherwise parse and reformat
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0];
+    };
+
     const receiptData = {
-      pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || '',
-      pilgrim_last_name: submission.pilgrim_last_name || submission.pilgrim?.last_name || '',
+      pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || 'Unknown',
+      pilgrim_last_name: submission.pilgrim_last_name || submission.pilgrim?.last_name || 'Unknown',
       pilgrim_phone: submission.pilgrim_phone || submission.pilgrim?.phone_number || '',
       pilgrim_email: submission.pilgrim_email || submission.pilgrim?.email || '',
       pilgrim_passport_number: submission.pilgrim_passport_number || submission.pilgrim?.passport_number || '',
       pilgrim_date_of_birth: submission.pilgrim_date_of_birth || submission.pilgrim?.date_of_birth || '',
       pilgrim_gender: submission.pilgrim_gender || submission.pilgrim?.gender || 'M',
-      amount: submission.amount,
+      amount: submission.amount || 0,
       reference_number: submission.reference_number || `REF${submission.id}`,
-      payment_date: formatDate(submission.submitted_at),
+      payment_date: formatDateForBackend(submission.submitted_at || new Date().toISOString()),
       registration_id: `REC${submission.id}`,
-      payer_name: submission.payer_name || '',
+      payer_name: submission.payer_name || 'Unknown',
       payer_relationship: submission.payer_relationship || '',
     };
 

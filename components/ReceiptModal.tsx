@@ -103,6 +103,14 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
+      // Format date as YYYY-MM-DD
+      const formatDateForBackend = (dateStr: string) => {
+        if (!dateStr) return new Date().toISOString().split('T')[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        const date = new Date(dateStr);
+        return date.toISOString().split('T')[0];
+      };
+
       // Clean up data - convert 'N/A' to empty strings
       const cleanValue = (val: any) => {
         if (val === 'N/A' || !val) return '';
@@ -121,8 +129,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         pilgrim_gender: data.pilgrim_gender || 'M',
         payer_name: cleanValue(data.payer_name) || 'Unknown',
         payer_relationship: cleanValue(data.payer_relationship),
-        amount: data.amount,
-        payment_date: data.payment_date,
+        amount: data.amount || 0,
+        payment_date: formatDateForBackend(data.payment_date),
       };
 
       console.log('Saving receipt with payload:', receiptPayload);
