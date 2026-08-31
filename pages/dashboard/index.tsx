@@ -56,13 +56,23 @@ export default function BankDashboardPage() {
   const handleOpenReceipt = (submission: BankPaymentSubmission) => {
     console.log('Opening receipt for submission:', submission);
 
-    // Format date as YYYY-MM-DD for backend
-    const formatDateForBackend = (dateStr: string) => {
+    // Format date as YYYY-MM-DD for backend - use submitted_at directly
+    const formatDateForBackend = (dateStr: any) => {
       if (!dateStr) return new Date().toISOString().split('T')[0];
+
+      // Convert to string if needed
+      const dateString = String(dateStr);
+
       // If already in YYYY-MM-DD format, return as is
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-      // Otherwise parse and reformat
-      const date = new Date(dateStr);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
+      // Parse the date
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateString);
+        return new Date().toISOString().split('T')[0];
+      }
+
       return date.toISOString().split('T')[0];
     };
 
@@ -76,11 +86,13 @@ export default function BankDashboardPage() {
       pilgrim_gender: submission.pilgrim_gender || submission.pilgrim?.gender || 'M',
       amount: submission.amount || 0,
       reference_number: submission.reference_number || `REF${submission.id}`,
-      payment_date: formatDateForBackend(submission.submitted_at || new Date().toISOString()),
+      payment_date: formatDateForBackend(submission.submitted_at),
       registration_id: `REC${submission.id}`,
       payer_name: submission.payer_name || 'Unknown',
       payer_relationship: submission.payer_relationship || '',
     };
+
+    console.log('Formatted payment_date:', receiptData.payment_date, 'from:', submission.submitted_at);
 
     console.log('Receipt data:', receiptData);
     setSelectedReceipt(receiptData);

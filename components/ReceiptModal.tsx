@@ -104,10 +104,21 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
       // Format date as YYYY-MM-DD
-      const formatDateForBackend = (dateStr: string) => {
+      const formatDateForBackend = (dateStr: any) => {
         if (!dateStr) return new Date().toISOString().split('T')[0];
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-        const date = new Date(dateStr);
+
+        const dateString = String(dateStr);
+
+        // If already in YYYY-MM-DD format, return as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
+        // Parse the date
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          console.warn('Invalid date:', dateString);
+          return new Date().toISOString().split('T')[0];
+        }
+
         return date.toISOString().split('T')[0];
       };
 
