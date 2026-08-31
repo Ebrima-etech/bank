@@ -128,7 +128,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         return val;
       };
 
-      const receiptPayload = {
+      const receiptPayload: any = {
         signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
@@ -136,13 +136,16 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         pilgrim_email: cleanValue(data.pilgrim_email),
         pilgrim_phone: cleanValue(data.pilgrim_phone),
         pilgrim_passport: cleanValue(data.pilgrim_passport_number),
-        pilgrim_dob: cleanValue(data.pilgrim_date_of_birth),
+        pilgrim_dob: cleanValue(data.pilgrim_date_of_birth) || null,
         pilgrim_gender: data.pilgrim_gender || 'M',
         payer_name: cleanValue(data.payer_name) || 'Unknown',
         payer_relationship: cleanValue(data.payer_relationship),
         amount: data.amount || 0,
         payment_date: formatDateForBackend(data.payment_date),
       };
+
+      // Don't send payment field - it's optional and we don't have a payment ID
+      delete receiptPayload.payment;
 
       console.log('Saving receipt with payload:', receiptPayload);
       await api.post('/receipts/', receiptPayload);
