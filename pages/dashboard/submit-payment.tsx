@@ -22,6 +22,9 @@ interface PaymentFormData {
   pilgrim_region: string;
   pilgrim_passport_number: string;
   pilgrim_address: string;
+  pilgrim_city: string;
+  pilgrim_state: string;
+  pilgrim_postal_code: string;
   pilgrim_country: string;
   second_contact_name: string;
   second_contact_phone: string;
@@ -98,6 +101,9 @@ export default function SubmitPaymentPage() {
     pilgrim_region: '',
     pilgrim_passport_number: '',
     pilgrim_address: '',
+    pilgrim_city: '',
+    pilgrim_state: '',
+    pilgrim_postal_code: '',
     pilgrim_country: 'Gambia',
     second_contact_name: '',
     second_contact_phone: '',
