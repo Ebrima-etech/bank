@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { bankLogout } from '@/lib/auth';
+import { bankLogout, isSessionExpired } from '@/lib/auth';
 import { useBankContext } from '@/lib/BankContext';
 import NavbarSkeleton from '@/components/Common/NavbarSkeleton';
 import { BiLogOut, BiBarChart } from 'react-icons/bi';
@@ -9,6 +10,25 @@ import toast from 'react-hot-toast';
 export default function Header() {
   const router = useRouter();
   const { user, bank, isAdmin, loading } = useBankContext();
+
+  // Check session expiration on mount and periodically
+  useEffect(() => {
+    const checkSessionExpiration = () => {
+      if (isSessionExpired()) {
+        bankLogout();
+        toast.error('Your session has expired. Please login again.');
+        router.push('/login');
+      }
+    };
+
+    // Check immediately on mount
+    checkSessionExpiration();
+
+    // Check every minute (60000ms) if session is still valid
+    const interval = setInterval(checkSessionExpiration, 60000);
+
+    return () => clearInterval(interval);
+  }, [router]);
 
   if (loading) {
     return <NavbarSkeleton />;
