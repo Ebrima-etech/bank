@@ -29,6 +29,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
   const [payerName, setPayerName] = useState('');
   const [payerContact, setPayerContact] = useState('');
   const [payerRelationship, setPayerRelationship] = useState('Self');
+  const [otherRelationship, setOtherRelationship] = useState('');
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +87,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
         // Payer info from form
         payer_name: payerName,
         payer_contact: payerContact,
-        payer_relationship: payerRelationship,
+        payer_relationship: payerRelationship === 'Other' ? otherRelationship : payerRelationship,
         // Deposit details
         amount: parseFloat(amount),
         reference_number: reference,
@@ -128,9 +129,9 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
             </div>
           )}
 
-          <form onSubmit={handleLookup} className="space-y-4">
+          <form onSubmit={handleLookup} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
                 Pilgrim ID or Phone Number
               </label>
               <input
@@ -148,24 +149,24 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
                 }}
                 placeholder="e.g., P001 or +220 3123456"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-base transition"
               />
-              <p className="text-xs text-gray-500 mt-1">Enter pilgrim registration ID or phone number</p>
+              <p className="text-xs text-gray-500 mt-2">Enter pilgrim registration ID or phone number</p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={onBack}
                 disabled={loading}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition disabled:opacity-50"
               >
                 Back
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold disabled:opacity-50 transition"
               >
                 {loading ? 'Searching...' : 'Find Pilgrim'}
               </button>
@@ -207,21 +208,21 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
           </div>
         )}
 
-        <form onSubmit={handleSubmitDeposit} className="space-y-4">
+        <form onSubmit={handleSubmitDeposit} className="space-y-6">
           {/* Info: Pilgrim details auto-filled from lookup */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
-            <p className="text-xs text-gray-600">
-              ✓ Pilgrim info auto-filled from lookup - only enter deposit & payer details below
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-900 font-medium">
+              ✓ Pilgrim info auto-filled - enter deposit & payer details below
             </p>
           </div>
 
           {/* Payer Information */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h4 className="text-sm font-semibold text-blue-900 mb-3">Who is making this payment?</h4>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
+            <h4 className="text-base font-bold text-emerald-900 mb-4">Who is making this payment?</h4>
 
-            <div className="space-y-3">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Payer Name *
                 </label>
                 <input
@@ -230,12 +231,12 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
                   onChange={(e) => setPayerName(e.target.value)}
                   placeholder="Full name of person making deposit"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-base transition"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Payer Contact/ID
                 </label>
                 <input
@@ -243,18 +244,23 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
                   value={payerContact}
                   onChange={(e) => setPayerContact(e.target.value)}
                   placeholder="Phone, ID, or account number"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-base transition"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Relationship to Pilgrim
                 </label>
                 <select
                   value={payerRelationship}
-                  onChange={(e) => setPayerRelationship(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  onChange={(e) => {
+                    setPayerRelationship(e.target.value);
+                    if (e.target.value !== 'Other') {
+                      setOtherRelationship('');
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-base transition"
                 >
                   <option value="Self">Self (Pilgrim themselves)</option>
                   <option value="Parent">Parent</option>
@@ -266,13 +272,23 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
                   <option value="Employer">Employer</option>
                   <option value="Other">Other</option>
                 </select>
+
+                {payerRelationship === 'Other' && (
+                  <input
+                    type="text"
+                    value={otherRelationship}
+                    onChange={(e) => setOtherRelationship(e.target.value)}
+                    placeholder="Please specify the relationship"
+                    className="w-full px-4 py-3 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-base transition mt-3 bg-emerald-50"
+                  />
+                )}
               </div>
             </div>
           </div>
 
           {/* Deposit Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
               Amount (GMD) *
             </label>
             <input
@@ -283,13 +299,13 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
               step="0.01"
               min="0"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-lg font-bold"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-lg font-bold transition"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
                 Payment Date
               </label>
               <input
@@ -297,24 +313,24 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
                 Reference
               </label>
               <input
                 type="text"
                 value={reference}
                 readOnly
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
               Notes (Optional)
             </label>
             <textarea
@@ -322,23 +338,66 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Additional notes..."
               rows={2}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none resize-none transition"
             />
           </div>
 
-          <div className="flex gap-3">
+          {/* Deposit Preview */}
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-lg p-6 space-y-4">
+            <h4 className="text-lg font-bold text-emerald-900 mb-4">📋 Deposit Summary</h4>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Pilgrim Name</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{pilgrimData.full_name}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Registration ID</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{pilgrimData.registration_id}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Payer Name</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{payerName}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Relationship</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{payerRelationship}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200 col-span-2">
+                <p className="text-xs text-gray-600 font-semibold">Amount</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{amount} GMD</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Payment Date</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{paymentDate}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Reference</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">{reference}</p>
+              </div>
+            </div>
+
+            {description && (
+              <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                <p className="text-xs text-gray-600 font-semibold">Notes</p>
+                <p className="text-sm text-gray-700 mt-1">{description}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={() => setStep('lookup')}
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition disabled:opacity-50"
             >
               Back
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold disabled:opacity-50 transition"
             >
               {loading ? 'Submitting...' : 'Submit Deposit'}
             </button>

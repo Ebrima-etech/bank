@@ -183,16 +183,16 @@ export default function BulkUploadPage() {
         </div>
 
         {/* CSV Format Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 mb-4">CSV File Format</h3>
-          <p className="text-sm text-blue-700 mb-4">Your CSV file must have these columns:</p>
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
+          <h3 className="font-semibold text-emerald-900 mb-4">CSV File Format</h3>
+          <p className="text-sm text-emerald-700 mb-4">Your CSV file must have these columns:</p>
           <div className="bg-white rounded p-4 text-sm font-mono text-gray-800 overflow-x-auto mb-4">
             <div>pilgrim_id,amount,reference_number,payment_date,description</div>
             <div className="text-gray-500 mt-2">Example:</div>
             <div>GH123456,5000,REF20240101ABC,2024-01-01,Payment from customer</div>
             <div>GH123457,3500,REF20240102DEF,2024-01-02,Partial payment</div>
           </div>
-          <p className="text-xs text-blue-700">
+          <p className="text-xs text-emerald-700">
             • Pilgrim ID: GHXXXXX format<br/>
             • Amount: Numeric value (no $ symbol)<br/>
             • Reference: Unique identifier<br/>

@@ -9,7 +9,7 @@ export default function Alert({ type, message, onClose }: AlertProps) {
     success: 'bg-success-50 text-success-600 border-success-200',
     error: 'bg-error-50 text-error-600 border-error-200',
     warning: 'bg-warning-50 text-warning-600 border-warning-200',
-    info: 'bg-blue-50 text-blue-600 border-blue-200',
+    info: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   };
 
   const icons = {

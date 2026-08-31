@@ -8,21 +8,28 @@ import { PaymentFormSkeleton, DashboardSkeleton } from '@/components/Common/Skel
 import api from '@/lib/api';
 import { generateReference } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { BiUserPlus, BiCreditCard, BiX, BiChevronLeft } from 'react-icons/bi';
 
 interface PaymentFormData {
   pilgrim_first_name: string;
   pilgrim_last_name: string;
   pilgrim_gender: 'M' | 'F';
   pilgrim_phone: string;
+  pilgrim_whatsapp: string;
   pilgrim_email: string;
   pilgrim_date_of_birth: string;
   pilgrim_nationality: string;
+  pilgrim_region: string;
   pilgrim_passport_number: string;
   pilgrim_address: string;
   pilgrim_city: string;
   pilgrim_state: string;
   pilgrim_postal_code: string;
   pilgrim_country: string;
+  second_contact_name: string;
+  second_contact_phone: string;
+  second_contact_whatsapp: string;
+  second_contact_relationship: string;
   payer_name: string;
   payer_contact: string;
   payer_relationship: string;
@@ -55,6 +62,16 @@ const formSteps = [
   },
 ];
 
+const GAMBIAN_REGIONS = [
+  'Banjul (Capital Municipality)',
+  'Kanifing (Municipality)',
+  'West Coast Region',
+  'North Bank Region',
+  'Lower River Region',
+  'Central River Region',
+  'Upper River Region',
+];
+
 export default function SubmitPaymentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -67,15 +84,21 @@ export default function SubmitPaymentPage() {
     pilgrim_last_name: '',
     pilgrim_gender: 'M',
     pilgrim_phone: '',
+    pilgrim_whatsapp: '',
     pilgrim_email: '',
     pilgrim_date_of_birth: '',
     pilgrim_nationality: 'Gambian',
+    pilgrim_region: '',
     pilgrim_passport_number: '',
     pilgrim_address: '',
     pilgrim_city: '',
     pilgrim_state: '',
     pilgrim_postal_code: '',
     pilgrim_country: 'Gambia',
+    second_contact_name: '',
+    second_contact_phone: '',
+    second_contact_whatsapp: '',
+    second_contact_relationship: '',
     payer_name: '',
     payer_contact: '',
     payer_relationship: 'Self',
@@ -233,39 +256,54 @@ export default function SubmitPaymentPage() {
   if (!depositType) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center p-8">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-lg p-8 max-w-md w-full">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">New Payment</h2>
-            <p className="text-gray-600 mb-8">What type of deposit is this?</p>
+        <div className="flex items-center justify-center py-12 px-4 min-h-[calc(100vh-200px)]">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-lg p-8 max-w-2xl w-full">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">💳 Submit Payment</h1>
+              <p className="text-gray-600">Select the type of deposit you want to process</p>
+            </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* First Deposit Option */}
               <button
                 onClick={() => setDepositType('first')}
-                className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left"
+                className="p-6 border-2 border-gray-200 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">🆕 First Deposit</h3>
-                <p className="text-sm text-gray-600">New pilgrim making their first payment</p>
-                <p className="text-xs text-emerald-600 mt-2 font-medium">Fill in pilgrim & payer details</p>
+                <div className="flex items-start gap-3 mb-3">
+                  <BiUserPlus size={24} className="text-emerald-600 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">First Deposit</h3>
+                    <p className="text-xs text-emerald-600 font-medium">New pilgrim</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 ml-9">Register a new pilgrim and record their payment</p>
+                <p className="text-xs text-emerald-600 mt-3 ml-9 font-medium">Fill in full details</p>
               </button>
 
               {/* Current Deposit Option */}
               <button
                 onClick={() => setDepositType('current')}
-                className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                className="p-6 border-2 border-gray-200 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">💳 Current Deposit</h3>
-                <p className="text-sm text-gray-600">Existing pilgrim adding to their account</p>
-                <p className="text-xs text-blue-600 mt-2 font-medium">Quick lookup by ID or phone</p>
+                <div className="flex items-start gap-3 mb-3">
+                  <BiCreditCard size={24} className="text-emerald-600 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Current Deposit</h3>
+                    <p className="text-xs text-emerald-600 font-medium">Existing pilgrim</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 ml-9">Record an additional payment for existing pilgrim</p>
+                <p className="text-xs text-emerald-600 mt-3 ml-9 font-medium">Quick lookup</p>
               </button>
             </div>
 
             {/* Back Button */}
             <button
               onClick={() => router.push('/dashboard')}
-              className="w-full mt-6 px-4 py-2 text-gray-600 hover:text-gray-900 text-sm font-medium"
+              className="w-full px-6 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 text-base font-semibold rounded-lg border border-gray-300 transition-all flex items-center justify-center gap-2 hover:border-gray-400"
             >
-              ← Back to Dashboard
+              <BiChevronLeft size={18} />
+              Back to Dashboard
             </button>
           </div>
         </div>
@@ -292,24 +330,31 @@ export default function SubmitPaymentPage() {
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {depositType === 'first' ? '🆕 First Deposit' : '💳 Current Deposit'}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              {depositType === 'first'
-                ? 'Register new pilgrim and record payment'
-                : 'Quick deposit for existing pilgrim'}
-            </p>
+        <div className="flex items-center justify-between pb-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            {depositType === 'first' ? (
+              <BiUserPlus size={32} className="text-emerald-600" />
+            ) : (
+              <BiCreditCard size={32} className="text-emerald-600" />
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {depositType === 'first' ? 'First Deposit' : 'Current Deposit'}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {depositType === 'first'
+                  ? 'Register new pilgrim and record payment'
+                  : 'Quick deposit for existing pilgrim'}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setDepositType(null)}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             title="Change deposit type"
             disabled={loading}
           >
-            ✕
+            <BiX size={20} />
           </button>
         </div>
 

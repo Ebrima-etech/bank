@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import Button from '@/components/Common/Button';
@@ -15,6 +15,10 @@ interface StaffMember {
     username: string;
     email: string;
   };
+  bank?: {
+    id: number;
+    name: string;
+  };
   role: string;
   is_active: boolean;
   access_restricted?: boolean;
@@ -25,14 +29,17 @@ interface StaffMember {
 
 export default function StaffManagementPage() {
   const router = useRouter();
+  const bankIdRef = useRef<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [bankInactive, setBankInactive] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [bankId, setBankId] = useState<number | null>(null);
   const [bankName, setBankName] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAccessForm, setShowAccessForm] = useState(false);
+  const [showBankFixForm, setShowBankFixForm] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     username: '',
@@ -64,21 +71,31 @@ export default function StaffManagementPage() {
       const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === currentUser.id);
 
       if (isCurrentUserAdmin) {
-        // Check if the bank is active
+        // Get the admin's bank from their role
         const userRole = adminRoles.find((role: any) => role.user?.id === currentUser.id);
-        if (userRole && userRole.bank) {
-          const bankResponse = await api.get(`/banks/${userRole.bank.id}/`);
-          setBankName(bankResponse.data.name);
 
-          if (bankResponse.data.is_active === false) {
-            setBankInactive(true);
-            setLoading(false);
-            return;
-          }
+        if (!userRole || !userRole.bank) {
+          toast.error('Unable to determine your bank. Contact support.');
+          router.push('/dashboard');
+          return;
+        }
+
+        const correctBankId = userRole.bank.id;
+        bankIdRef.current = correctBankId;
+        setBankId(correctBankId);
+
+        // Verify bank is active
+        const bankResponse = await api.get(`/banks/${correctBankId}/`);
+        setBankName(bankResponse.data.name);
+
+        if (bankResponse.data.is_active === false) {
+          setBankInactive(true);
+          setLoading(false);
+          return;
         }
 
         setAuthorized(true);
-        fetchStaff();
+        fetchStaff(correctBankId);
       } else {
         toast.error('Unauthorized: Only bank admins can manage staff');
         router.push('/dashboard');
@@ -90,13 +107,20 @@ export default function StaffManagementPage() {
     }
   };
 
-  const fetchStaff = async () => {
+  const fetchStaff = async (adminBankId?: number) => {
     try {
       setLoading(true);
       const response = await api.get('/user-roles/?role=bank_staff');
       let staffList = response.data.results || response.data;
-      // Filter out the current logged-in user - admins should not see themselves
-      staffList = staffList.filter((member: StaffMember) => member.user.id !== currentUserId);
+
+      const targetBankId = adminBankId || bankId;
+
+      // Filter to only show staff from the admin's bank
+      // Also filter out the current logged-in user
+      staffList = staffList.filter((member: StaffMember) =>
+        member.user.id !== currentUserId &&
+        member.bank?.id === targetBankId
+      );
       setStaff(staffList);
     } catch (error) {
       console.error('Error fetching staff:', error);
@@ -108,10 +132,14 @@ export default function StaffManagementPage() {
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      // Get current user's bank from auth
-      const meResponse = await api.get('/auth/me/');
 
+    const actualBankId = bankIdRef.current || bankId;
+    if (!actualBankId) {
+      toast.error('Unable to determine your bank. Please refresh and try again.');
+      return;
+    }
+
+    try {
       // Create user
       const userResponse = await api.post('/users/register/', {
         username: formData.username,
@@ -119,14 +147,11 @@ export default function StaffManagementPage() {
         password: formData.password,
       });
 
-      // Create bank staff role (need to get bank ID from current user's role)
-      const rolesResponse = await api.get('/user-roles/?role=bank_admin');
-      const adminRole = rolesResponse.data.results?.[0] || rolesResponse.data[0];
-
+      // Create bank staff role using current admin's bank ID from ref
       await api.post('/user-roles/', {
         user_id: userResponse.data.id,
         role: 'bank_staff',
-        bank_id: adminRole.bank?.id,
+        bank_id: actualBankId,
         is_active: true,
       });
 
@@ -182,6 +207,23 @@ export default function StaffManagementPage() {
       fetchStaff();
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Failed to update access restrictions');
+    }
+  };
+
+  const handleFixStaffBank = async (staffId: number) => {
+    const actualBankId = bankIdRef.current || bankId;
+    if (!actualBankId) {
+      toast.error('Unable to determine your bank');
+      return;
+    }
+    try {
+      await api.patch(`/user-roles/${staffId}/`, { bank_id: actualBankId });
+      toast.success('Staff member reassigned to your bank successfully!');
+      setShowBankFixForm(false);
+      setSelectedStaffId(null);
+      fetchStaff(actualBankId);
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to reassign staff member');
     }
   };
 
@@ -386,6 +428,35 @@ export default function StaffManagementPage() {
           </div>
         )}
 
+        {/* Fix Bank Assignment Form */}
+        {showBankFixForm && selectedStaffId && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-gray-900">Fix Bank Assignment</h2>
+              <button onClick={() => setShowBankFixForm(false)}>
+                <BiX size={24} className="text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-700 mb-6">
+              This staff member is assigned to the wrong bank. Click "Reassign" to move them to your bank ({bankName}).
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleFixStaffBank(selectedStaffId)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition"
+              >
+                Reassign to {bankName}
+              </button>
+              <button
+                onClick={() => setShowBankFixForm(false)}
+                className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-900 text-sm font-medium rounded-lg transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Staff List */}
         <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Current Staff</h2>
@@ -419,10 +490,15 @@ export default function StaffManagementPage() {
                         ⏰ Access Restricted: {member.allowed_days} {member.access_start_time}-{member.access_end_time}
                       </p>
                     )}
-                    <div className="flex gap-2 pt-2">
+                    {member.bank?.id !== bankId && (
+                      <p className="text-xs text-red-600 font-medium bg-red-50 px-2 py-1 rounded">
+                        ⚠️ Assigned to wrong bank: {member.bank?.name}
+                      </p>
+                    )}
+                    <div className="flex gap-2 pt-2 flex-wrap">
                       <button
                         onClick={() => handleToggleStaffActive(member.id, member.is_active)}
-                        className={`flex-1 px-3 py-1.5 rounded text-xs font-medium transition flex items-center justify-center gap-1 ${
+                        className={`flex-1 min-w-[120px] px-3 py-1.5 rounded text-xs font-medium transition flex items-center justify-center gap-1 ${
                           member.is_active
                             ? 'bg-red-50 text-red-600 hover:bg-red-100'
                             : 'bg-green-50 text-green-600 hover:bg-green-100'
@@ -433,10 +509,21 @@ export default function StaffManagementPage() {
                       </button>
                       <button
                         onClick={() => handleOpenAccessForm(member)}
-                        className="flex-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-xs font-medium transition flex items-center justify-center gap-1"
+                        className="flex-1 min-w-[120px] px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-xs font-medium transition flex items-center justify-center gap-1"
                       >
                         <BiEdit size={14} /> Access Times
                       </button>
+                      {member.bank?.id !== bankId && (
+                        <button
+                          onClick={() => {
+                            setSelectedStaffId(member.id);
+                            setShowBankFixForm(true);
+                          }}
+                          className="flex-1 min-w-[120px] px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-medium transition flex items-center justify-center gap-1"
+                        >
+                          🔧 Fix Bank
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

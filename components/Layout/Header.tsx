@@ -1,58 +1,18 @@
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { bankLogout, getBankUser, BankUser } from '@/lib/auth';
-import { BiChevronDown, BiLogOut } from 'react-icons/bi';
-import api from '@/lib/api';
+import { bankLogout } from '@/lib/auth';
+import { useBankContext } from '@/lib/BankContext';
+import NavbarSkeleton from '@/components/Common/NavbarSkeleton';
+import { BiLogOut, BiBarChart } from 'react-icons/bi';
 import toast from 'react-hot-toast';
-
-interface Bank {
-  id: number;
-  name: string;
-  logo?: string | null;
-}
 
 export default function Header() {
   const router = useRouter();
-  const [user, setUser] = useState<BankUser | null>(null);
-  const [bank, setBank] = useState<Bank | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, bank, isAdmin, loading } = useBankContext();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getBankUser();
-        setUser(userData);
-
-        // Fetch bank associated with this user
-        try {
-          const rolesResponse = await api.get(`/user-roles/?user=${userData.id}`);
-          const userRoles = rolesResponse.data.results || rolesResponse.data;
-          if (userRoles.length > 0 && userRoles[0].bank) {
-            const bankResponse = await api.get(`/banks/${userRoles[0].bank.id}/`);
-            setBank(bankResponse.data);
-          }
-        } catch (error) {
-          console.error('Error fetching bank:', error);
-        }
-
-        // Check if THIS specific user is a bank admin
-        try {
-          const rolesResponse = await api.get(`/user-roles/?user=${userData.id}&role=bank_admin`);
-          const adminRoles = rolesResponse.data.results || rolesResponse.data;
-          const isCurrentUserAdmin = adminRoles.some((role: any) => role.user?.id === userData.id);
-          setIsAdmin(isCurrentUserAdmin);
-        } catch (error) {
-          console.error('Error checking user role:', error);
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  if (loading) {
+    return <NavbarSkeleton />;
+  }
 
   const handleLogout = () => {
     bankLogout();
@@ -68,7 +28,7 @@ export default function Header() {
           {bank?.logo ? (
             <img src={bank.logo} alt={bank.name} className="h-10 w-10 object-contain" />
           ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow">
               🏦
             </div>
           )}
@@ -83,7 +43,7 @@ export default function Header() {
           <Link href="/dashboard">
             <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               router.pathname === '/dashboard'
-                ? 'text-blue-700 bg-blue-50'
+                ? 'text-emerald-700 bg-emerald-50'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}>
               Dashboard
@@ -92,22 +52,34 @@ export default function Header() {
           <Link href="/dashboard/submit-payment">
             <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
               router.pathname === '/dashboard/submit-payment'
-                ? 'text-blue-700 bg-blue-50'
+                ? 'text-emerald-700 bg-emerald-50'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}>
               Submit Payment
             </span>
           </Link>
           {isAdmin && (
-            <Link href="/dashboard/staff">
-              <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                router.pathname === '/dashboard/staff'
-                  ? 'text-blue-700 bg-blue-50'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}>
-                Staff
-              </span>
-            </Link>
+            <>
+              <Link href="/dashboard/staff">
+                <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  router.pathname === '/dashboard/staff'
+                    ? 'text-emerald-700 bg-emerald-50'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}>
+                  Staff
+                </span>
+              </Link>
+              <Link href="/dashboard/audit-logs">
+                <span className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                  router.pathname === '/dashboard/audit-logs'
+                    ? 'text-emerald-700 bg-emerald-50'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}>
+                  <BiBarChart size={16} />
+                  Audit Logs
+                </span>
+              </Link>
+            </>
           )}
         </nav>
 

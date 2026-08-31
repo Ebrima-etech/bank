@@ -10,7 +10,7 @@ import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide, BiCog } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide, BiCog, BiBarChart } from 'react-icons/bi';
 
 interface Bank {
   id: number;
@@ -234,7 +234,13 @@ export default function BankDashboardPage() {
       console.log('DEBUG: Selected date:', selectedDate);
       console.log('DEBUG: Access level:', paymentAccessLevel);
 
-      // For admins with date_restricted access, apply date filter
+      // Calculate cumulative stats from ALL data (before filtering for display)
+      const cumulativeTotal = data.length;
+      const cumulativeAmount = data.reduce((sum: number, s: BankPaymentSubmission) => sum + s.amount, 0);
+      const cumulativeVerified = data.filter((s: BankPaymentSubmission) => s.status === 'verified').length;
+      const cumulativePending = data.filter((s: BankPaymentSubmission) => s.status === 'pending').length;
+
+      // For admins with date_restricted access, apply date filter for DISPLAY only
       // For unrestricted access, show all submissions
       if (isAdmin && paymentAccessLevel === 'date_restricted') {
         data = data.filter((sub: BankPaymentSubmission) => {
@@ -266,12 +272,13 @@ export default function BankDashboardPage() {
 
       setSubmissions(data);
 
-      const total = data.length;
-      const amount = data.reduce((sum: number, s: BankPaymentSubmission) => sum + s.amount, 0);
-      const verified = data.filter((s: BankPaymentSubmission) => s.status === 'verified').length;
-      const pending = data.filter((s: BankPaymentSubmission) => s.status === 'pending').length;
-
-      setStats({ total, amount, verified, pending });
+      // Use cumulative stats (not filtered) for stats cards
+      setStats({
+        total: cumulativeTotal,
+        amount: cumulativeAmount,
+        verified: cumulativeVerified,
+        pending: cumulativePending
+      });
     } catch (error) {
       console.error('Failed to fetch submissions:', error);
     } finally {
@@ -435,7 +442,7 @@ export default function BankDashboardPage() {
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       />
                     </div>
                   ) : (
@@ -449,7 +456,7 @@ export default function BankDashboardPage() {
                     <select
                       value={selectedTeller}
                       onChange={(e) => setSelectedTeller(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent cursor-pointer"
                     >
                       <option value="">All Tellers</option>
                       {tellers.map((teller) => (

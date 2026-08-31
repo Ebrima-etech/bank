@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Toaster } from 'react-hot-toast';
 import { isBankLoggedIn } from '@/lib/auth';
+import { BankProvider } from '@/lib/BankContext';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -19,7 +20,13 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Toaster position="top-right" />
-      <Component {...pageProps} />
+      {isPublicPage ? (
+        <Component {...pageProps} />
+      ) : (
+        <BankProvider>
+          <Component {...pageProps} />
+        </BankProvider>
+      )}
     </>
   );
 }

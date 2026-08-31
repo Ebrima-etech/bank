@@ -131,8 +131,8 @@ axios.post(
         {/* API Endpoint */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 md:p-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">📡 API Endpoint</h2>
-          <div className="bg-blue-50 rounded p-4 mb-4 flex items-center justify-between">
-            <code className="text-sm text-blue-900">{apiEndpoint}</code>
+          <div className="bg-emerald-50 rounded p-4 mb-4 flex items-center justify-between">
+            <code className="text-sm text-emerald-900">{apiEndpoint}</code>
             <Button
               size="sm"
               variant="secondary"
