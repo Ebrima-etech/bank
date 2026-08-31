@@ -1,5 +1,6 @@
 import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useState, useEffect } from 'react';
 
 interface ReceiptData {
   pilgrim_first_name: string;
@@ -17,12 +18,48 @@ interface ReceiptData {
   payer_relationship: string;
 }
 
+interface SignatorySettings {
+  signatory_name: string;
+  signatory_title: string;
+  digital_signature?: string;
+  official_stamp?: string;
+  stamp_color: string;
+  bank_contact_email: string;
+  bank_contact_phone: string;
+}
+
 interface ReceiptModalProps {
   data: ReceiptData;
   onClose: () => void;
 }
 
 export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
+  const [signatory, setSignatory] = useState<SignatorySettings>({
+    signatory_name: 'GIA Bank Admin',
+    signatory_title: 'Bank Administrator',
+    stamp_color: '#16a34a',
+    bank_contact_email: 'support@giabanking.gm',
+    bank_contact_phone: '+220 XXX XXXX',
+  });
+
+  useEffect(() => {
+    fetchSignatorySettings();
+  }, []);
+
+  const fetchSignatorySettings = async () => {
+    try {
+      // Fetch from GIA backend (adjust URL based on your API setup)
+      const response = await fetch('/api/settings/signatory/');
+      if (response.ok) {
+        const data = await response.json();
+        setSignatory(data);
+      }
+    } catch (error) {
+      console.warn('Failed to load signatory settings:', error);
+      // Use defaults if fetch fails
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -63,22 +100,30 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
             <p className="text-sm text-gray-500 mt-1">Official Payment Receipt</p>
 
             {/* Official Stamp */}
-            <svg
-              className="absolute top-2 right-4 w-20 h-20 opacity-80 print:opacity-100"
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.3"/>
-                </filter>
-              </defs>
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#16a34a" strokeWidth="2" filter="url(#shadow)" opacity="0.6" strokeDasharray="3,2"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#16a34a" strokeWidth="1" opacity="0.5"/>
-              <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#16a34a" opacity="0.7">OFFICIAL</text>
-              <text x="50" y="47" textAnchor="middle" fontSize="7" fill="#16a34a" opacity="0.7">RECEIPT</text>
-              <text x="50" y="58" textAnchor="middle" fontSize="7" fill="#16a34a" opacity="0.7">VERIFIED</text>
-            </svg>
+            {signatory.official_stamp ? (
+              <img
+                src={signatory.official_stamp}
+                alt="Official Stamp"
+                className="absolute top-2 right-4 w-20 h-20 opacity-80 print:opacity-100 object-contain"
+              />
+            ) : (
+              <svg
+                className="absolute top-2 right-4 w-20 h-20 opacity-80 print:opacity-100"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+                  </filter>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="none" stroke={signatory.stamp_color} strokeWidth="2" filter="url(#shadow)" opacity="0.6" strokeDasharray="3,2"/>
+                <circle cx="50" cy="50" r="38" fill="none" stroke={signatory.stamp_color} strokeWidth="1" opacity="0.5"/>
+                <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill={signatory.stamp_color} opacity="0.7">OFFICIAL</text>
+                <text x="50" y="47" textAnchor="middle" fontSize="7" fill={signatory.stamp_color} opacity="0.7">RECEIPT</text>
+                <text x="50" y="58" textAnchor="middle" fontSize="7" fill={signatory.stamp_color} opacity="0.7">VERIFIED</text>
+              </svg>
+            )}
           </div>
 
           {/* Receipt Reference Numbers */}
@@ -175,14 +220,23 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
             <div className="grid grid-cols-2 gap-8">
               {/* Authorized Officer */}
               <div className="text-center">
-                <div className="h-16 border-b-2 border-gray-400 mb-2 flex items-center justify-center">
-                  <svg className="w-12 h-12 text-gray-400" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M 20 50 Q 50 20, 80 50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                    <path d="M 30 55 L 70 60" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                  </svg>
+                <div className="h-16 border-b-2 border-gray-400 mb-2 flex items-center justify-center overflow-hidden">
+                  {signatory.digital_signature ? (
+                    <img
+                      src={signatory.digital_signature}
+                      alt="Digital Signature"
+                      className="max-w-full max-h-16 object-contain"
+                    />
+                  ) : (
+                    <svg className="w-12 h-12 text-gray-400" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M 20 50 Q 50 20, 80 50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                      <path d="M 30 55 L 70 60" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                    </svg>
+                  )}
                 </div>
                 <p className="text-xs font-semibold text-gray-600 uppercase">Authorized By</p>
-                <p className="text-xs text-gray-500 mt-1">GIA Bank Admin</p>
+                <p className="text-xs text-gray-500 mt-1">{signatory.signatory_name}</p>
+                <p className="text-xs text-gray-500">{signatory.signatory_title}</p>
               </div>
 
               {/* Timestamp */}
@@ -214,7 +268,10 @@ export default function ReceiptModal({ data, onClose }: ReceiptModalProps) {
           <div className="text-center py-6 border-t-2 border-gray-400 mt-8">
             <p className="text-xs text-gray-600 font-semibold">OFFICIAL PAYMENT RECEIPT</p>
             <p className="text-xs text-gray-500 mt-2">This is an officially signed digital receipt from GIA Bank Portal</p>
-            <p className="text-xs text-gray-500">For inquiries, contact: support@giabanking.gm</p>
+            <p className="text-xs text-gray-500">For inquiries, contact: {signatory.bank_contact_email}</p>
+            {signatory.bank_contact_phone && (
+              <p className="text-xs text-gray-500">Phone: {signatory.bank_contact_phone}</p>
+            )}
             <p className="text-xs text-gray-500 mt-3 print:block hidden">
               Document ID: {registrationId} | Generated: {currentTime.toLocaleString('en-GM')}
             </p>
