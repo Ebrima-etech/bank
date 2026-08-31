@@ -94,8 +94,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
       const receiptPayload = {
-        payment: null,
-        signatory: signatory.id,
+        signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
         pilgrim_first_name: data.pilgrim_first_name,
         pilgrim_last_name: data.pilgrim_last_name,
@@ -110,13 +109,15 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         payment_date: data.payment_date,
       };
 
+      console.log('Saving receipt with payload:', receiptPayload);
       await api.post('/receipts/', receiptPayload);
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Failed to save receipt:', error);
-      alert('Failed to save receipt. Please try again.');
+      const errorMsg = error.response?.data?.detail || error.response?.data?.signatory?.[0] || error.message || 'Failed to save receipt';
+      alert(`Failed to save receipt: ${errorMsg}`);
     } finally {
       setSavingReceipt(false);
     }
