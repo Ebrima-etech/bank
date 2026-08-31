@@ -101,14 +101,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   const handleSaveReceipt = async () => {
     try {
       setSavingReceipt(true);
-
-      // Check if signatory is valid
-      if (!signatory.id || signatory.id === 0) {
-        alert('Error: No signatory found. Please check if signatories are configured in GIA settings.');
-        setSavingReceipt(false);
-        return;
-      }
-
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
       // Clean up data - convert 'N/A' to empty strings
@@ -118,7 +110,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       };
 
       const receiptPayload = {
-        signatory: signatory.id,
+        signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
         pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
