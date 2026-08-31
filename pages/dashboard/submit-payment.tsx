@@ -396,7 +396,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Hassan"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -412,7 +412,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Jallow"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -428,7 +428,7 @@ export default function SubmitPaymentPage() {
                         value={formData.pilgrim_date_of_birth}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -440,7 +440,7 @@ export default function SubmitPaymentPage() {
                         name="pilgrim_gender"
                         value={formData.pilgrim_gender}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer transition-all bg-white"
                       >
                         <option value="M">Alagie (Male)</option>
                         <option value="F">Aja (Female)</option>
@@ -461,7 +461,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., +220 3123456"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -476,7 +476,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., +220 3123456"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -493,7 +493,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., hassan@example.com"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -505,7 +505,7 @@ export default function SubmitPaymentPage() {
                         name="pilgrim_region"
                         value={formData.pilgrim_region}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
                       >
                         <option value="">Select a region</option>
                         {GAMBIAN_REGIONS.map((region) => (
@@ -532,7 +532,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., GM123456"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -548,7 +548,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Gambian"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -565,7 +565,7 @@ export default function SubmitPaymentPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Street address"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
 
@@ -582,7 +582,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Banjul"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -597,7 +597,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Optional"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -615,7 +615,7 @@ export default function SubmitPaymentPage() {
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Gambia"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -630,7 +630,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Optional"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -649,7 +649,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Full name"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -664,7 +664,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Parent, Sibling"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -681,7 +681,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., +220 3123456"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
 
@@ -696,7 +696,7 @@ export default function SubmitPaymentPage() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., +220 3123456"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -727,7 +727,7 @@ export default function SubmitPaymentPage() {
                       disabled={formData.payer_relationship === 'Self'}
                       readOnly={formData.payer_relationship === 'Self'}
                       required
-                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none ${
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all ${
                         formData.payer_relationship === 'Self' ? 'bg-gray-100 cursor-not-allowed' : ''
                       }`}
                     />
@@ -746,7 +746,7 @@ export default function SubmitPaymentPage() {
                       placeholder="Phone, ID, or account number"
                       disabled={formData.payer_relationship === 'Self'}
                       readOnly={formData.payer_relationship === 'Self'}
-                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none ${
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all ${
                         formData.payer_relationship === 'Self' ? 'bg-gray-100 cursor-not-allowed' : ''
                       }`}
                     />
@@ -763,7 +763,7 @@ export default function SubmitPaymentPage() {
                       name="payer_relationship"
                       value={formData.payer_relationship}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer bg-white transition-all"
                     >
                       <option value="Self">Self (Pilgrim themselves)</option>
                       <option value="Parent">Parent</option>
@@ -795,7 +795,7 @@ export default function SubmitPaymentPage() {
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
 
@@ -810,7 +810,7 @@ export default function SubmitPaymentPage() {
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
 
@@ -977,7 +977,7 @@ export default function SubmitPaymentPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Any additional notes about this payment..."
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
                     />
                   </div>
 
