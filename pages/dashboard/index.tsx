@@ -478,11 +478,13 @@ export default function BankDashboardPage() {
                   <BiUpload size={16} /> Bulk Upload
                 </Button>
               </Link>
-              <Link href="/dashboard/settings">
-                <Button className="flex items-center gap-2 border border-gray-300 text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium">
-                  <BiCog size={16} /> Settings
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link href="/dashboard/settings">
+                  <Button className="flex items-center gap-2 border border-gray-300 text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium">
+                    <BiCog size={16} /> Settings
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
