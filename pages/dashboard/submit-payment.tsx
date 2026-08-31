@@ -89,6 +89,7 @@ export default function SubmitPaymentPage() {
   const [success, setSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [depositType, setDepositType] = useState<'first' | 'current' | null>(null);
+  const [hajjYearAmount, setHajjYearAmount] = useState<number>(0);
   const [formData, setFormData] = useState<PaymentFormData>({
     pilgrim_first_name: '',
     pilgrim_last_name: '',
@@ -150,6 +151,28 @@ export default function SubmitPaymentPage() {
       e.preventDefault();
     }
   };
+
+  // Fetch active Hajj Year and set amount on component mount
+  useEffect(() => {
+    const fetchHajjYear = async () => {
+      try {
+        const response = await api.get('/hajj-years/?is_active=true');
+        const hajjYears = response.data.results || response.data;
+        if (hajjYears.length > 0) {
+          const activeYear = hajjYears[0];
+          const amount = parseFloat(activeYear.total_package_fee) || 0;
+          setHajjYearAmount(amount);
+          setFormData((prev) => ({
+            ...prev,
+            amount: amount,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch Hajj year:', err);
+      }
+    };
+    fetchHajjYear();
+  }, []);
 
   // Auto-fill payer info when "Self" is selected
   useEffect(() => {
@@ -762,6 +785,13 @@ export default function SubmitPaymentPage() {
               {/* Step 4: Payment Details */}
               {currentStep === 4 && (
                 <div className="space-y-4">
+                  {hajjYearAmount > 0 && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+                      <p className="text-sm text-emerald-800">
+                        <strong>Auto-populated Amount:</strong> The amount is automatically set based on the current Hajj year package fee.
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Amount (GMD) *
@@ -775,9 +805,17 @@ export default function SubmitPaymentPage() {
                       placeholder="0.00"
                       step="0.01"
                       min="0"
+                      readOnly={hajjYearAmount > 0}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all ${
+                        hajjYearAmount > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                      }`}
                     />
+                    {hajjYearAmount > 0 && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Amount is set from Hajj year configuration: {hajjYearAmount} GMD
+                      </p>
+                    )}
                   </div>
 
                   <div>
