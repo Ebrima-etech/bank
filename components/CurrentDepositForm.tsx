@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Alert from './Common/Alert';
 import api from '@/lib/api';
-import { generateReference } from '@/lib/utils';
+import { generateReference, formatCurrency } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 interface CurrentDepositFormProps {
@@ -96,7 +96,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
       };
 
       await api.post('/bank-payment-submissions/current_submission/', depositData);
-      toast.success(`Deposit of ${amount} GMD recorded!`);
+      toast.success(`Deposit of ${formatCurrency(amount)} recorded!`);
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
@@ -365,7 +365,7 @@ export default function CurrentDepositForm({ onBack }: CurrentDepositFormProps) 
               </div>
               <div className="bg-white rounded-lg p-4 border border-emerald-200 col-span-2">
                 <p className="text-xs text-gray-600 font-semibold">Amount</p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">{amount} GMD</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(amount)}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-emerald-200">
                 <p className="text-xs text-gray-600 font-semibold">Payment Date</p>

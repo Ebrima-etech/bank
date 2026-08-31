@@ -6,7 +6,7 @@ import CurrentDepositForm from '@/components/CurrentDepositForm';
 import Alert from '@/components/Common/Alert';
 import { PaymentFormSkeleton, DashboardSkeleton } from '@/components/Common/Skeleton';
 import api from '@/lib/api';
-import { generateReference } from '@/lib/utils';
+import { generateReference, formatCurrency } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { BiUserPlus, BiCreditCard, BiX, BiChevronLeft } from 'react-icons/bi';
 
@@ -971,7 +971,7 @@ export default function SubmitPaymentPage() {
                       <div>
                         <p className="text-gray-600">Amount</p>
                         <p className="font-mono font-bold text-emerald-700 text-lg">
-                          {formData.amount} GMD
+                          {formatCurrency(formData.amount)}
                         </p>
                       </div>
                       <div>
