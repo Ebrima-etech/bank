@@ -6,11 +6,12 @@ import Layout from '@/components/Layout';
 import Loading from '@/components/Common/Loading';
 import Button from '@/components/Common/Button';
 import { DashboardSkeleton, StatCardSkeleton } from '@/components/Common/Skeleton';
+import ReceiptModal from '@/components/ReceiptModal';
 import { BankPaymentSubmission, BankUser } from '@/types';
 import api from '@/lib/api';
 import { getBankUser } from '@/lib/auth';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils';
-import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide, BiCog, BiBarChart } from 'react-icons/bi';
+import { BiUpload, BiPlus, BiCheckCircle, BiHourglass, BiListUl, BiDollar, BiChevronRight, BiShow, BiHide, BiCog, BiBarChart, BiReceipt } from 'react-icons/bi';
 
 interface Bank {
   id: number;
@@ -43,12 +44,32 @@ export default function BankDashboardPage() {
   const [tellers, setTellers] = useState<any[]>([]);
   const [paymentAccessLevel, setPaymentAccessLevel] = useState<'date_restricted' | 'unrestricted'>('date_restricted');
   const [hiddenFields, setHiddenFields] = useState<Set<string>>(new Set());
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [stats, setStats] = useState({
     total: 0,
     amount: 0,
     verified: 0,
     pending: 0,
   });
+
+  const handleOpenReceipt = (submission: BankPaymentSubmission) => {
+    const receiptData = {
+      pilgrim_first_name: submission.pilgrim?.first_name || 'N/A',
+      pilgrim_last_name: submission.pilgrim?.last_name || 'N/A',
+      pilgrim_phone: submission.pilgrim?.phone_number || 'N/A',
+      pilgrim_email: submission.pilgrim?.email || 'N/A',
+      pilgrim_passport_number: submission.pilgrim?.passport_number || 'N/A',
+      pilgrim_date_of_birth: submission.pilgrim?.date_of_birth || 'N/A',
+      pilgrim_gender: submission.pilgrim?.gender || 'M',
+      amount: submission.amount,
+      reference_number: submission.reference_number || `REF${submission.id}`,
+      payment_date: formatDate(submission.submitted_at),
+      registration_id: `REC${submission.id}`,
+      payer_name: submission.payer_name || 'N/A',
+      payer_relationship: submission.payer_relationship || 'N/A',
+    };
+    setSelectedReceipt(receiptData);
+  };
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371; // Earth's radius in kilometers
@@ -536,6 +557,7 @@ export default function BankDashboardPage() {
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Status</th>
                     {isAdmin && <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Teller</th>}
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Date</th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -565,6 +587,16 @@ export default function BankDashboardPage() {
                       </td>
                       {isAdmin && <td className="px-6 py-3.5 text-sm font-medium text-gray-700">@{sub.submitted_by_user || 'N/A'}</td>}
                       <td className="px-6 py-3.5 text-sm text-gray-600">{formatDate(sub.submitted_at)}</td>
+                      <td className="px-6 py-3.5 text-sm">
+                        <button
+                          onClick={() => handleOpenReceipt(sub)}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-medium transition-colors"
+                          title="View receipt"
+                        >
+                          <BiReceipt size={16} />
+                          Receipt
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -582,6 +614,13 @@ export default function BankDashboardPage() {
           )}
         </div>
       </div>
+
+      {selectedReceipt && (
+        <ReceiptModal
+          data={selectedReceipt}
+          onClose={() => setSelectedReceipt(null)}
+        />
+      )}
     </Layout>
   );
 }
