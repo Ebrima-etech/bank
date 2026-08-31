@@ -70,20 +70,30 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     try {
       // Fetch active signatory from GIA backend
       const signatoryResponse = await api.get('/signatories/');
-      if (signatoryResponse.data) {
+      console.log('Signatories response:', signatoryResponse.data);
+
+      if (signatoryResponse.data && Array.isArray(signatoryResponse.data)) {
         const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
         if (activeSignatory) {
+          console.log('Active signatory found:', activeSignatory);
           setSignatory(activeSignatory);
+        } else {
+          // If no active signatory, use first one
+          if (signatoryResponse.data.length > 0) {
+            console.log('No active signatory, using first:', signatoryResponse.data[0]);
+            setSignatory(signatoryResponse.data[0]);
+          }
         }
       }
 
       // Also fetch global settings
       const settingsResponse = await api.get('/settings/signatory/');
       if (settingsResponse.data) {
+        console.log('Settings response:', settingsResponse.data);
         setGlobalSettings(settingsResponse.data);
       }
     } catch (error) {
-      console.warn('Failed to load signatory settings:', error);
+      console.error('Failed to load signatory settings:', error);
       // Use defaults if fetch fails
     }
   };
@@ -91,6 +101,14 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   const handleSaveReceipt = async () => {
     try {
       setSavingReceipt(true);
+
+      // Check if signatory is valid
+      if (!signatory.id || signatory.id === 0) {
+        alert('Error: No signatory found. Please check if signatories are configured in GIA settings.');
+        setSavingReceipt(false);
+        return;
+      }
+
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
 
       // Clean up data - convert 'N/A' to empty strings
@@ -100,7 +118,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       };
 
       const receiptPayload = {
-        signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
+        signatory: signatory.id,
         receipt_number: receiptNumber,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
         pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
