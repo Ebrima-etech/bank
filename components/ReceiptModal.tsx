@@ -128,40 +128,29 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const fetchSignatorySettings = async () => {
     try {
-      // Check if we have cached signatory
-      const cachedSignatory = sessionStorage.getItem('cached_signatory');
-      const cachedSettings = sessionStorage.getItem('cached_settings');
-
-      if (cachedSignatory && cachedSettings) {
-        console.log('Using cached signatory and settings');
-        setSignatory(JSON.parse(cachedSignatory));
-        setGlobalSettings(JSON.parse(cachedSettings));
-        return;
-      }
-
       // Fetch active signatory from GIA backend
       const signatoryResponse = await api.get('/signatories/');
       console.log('Signatories response:', signatoryResponse.data);
 
-      if (signatoryResponse.data && Array.isArray(signatoryResponse.data)) {
+      if (signatoryResponse.data && Array.isArray(signatoryResponse.data) && signatoryResponse.data.length > 0) {
         const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
         const signatoryToUse = activeSignatory || signatoryResponse.data[0];
 
-        if (signatoryToUse) {
+        if (signatoryToUse && signatoryToUse.id > 0) {
           console.log('Signatory found:', signatoryToUse);
           setSignatory(signatoryToUse);
-          // Cache for future use
-          sessionStorage.setItem('cached_signatory', JSON.stringify(signatoryToUse));
         }
       }
 
       // Also fetch global settings
-      const settingsResponse = await api.get('/settings/signatory/');
-      if (settingsResponse.data) {
-        console.log('Settings response:', settingsResponse.data);
-        setGlobalSettings(settingsResponse.data);
-        // Cache for future use
-        sessionStorage.setItem('cached_settings', JSON.stringify(settingsResponse.data));
+      try {
+        const settingsResponse = await api.get('/settings/signatory/');
+        if (settingsResponse.data) {
+          console.log('Settings response:', settingsResponse.data);
+          setGlobalSettings(settingsResponse.data);
+        }
+      } catch (settingsError) {
+        console.warn('Failed to load settings, using defaults:', settingsError);
       }
     } catch (error) {
       console.error('Failed to load signatory settings:', error);
