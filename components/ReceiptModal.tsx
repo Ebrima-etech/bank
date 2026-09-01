@@ -169,8 +169,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     }
   };
 
-  const handleSaveReceipt = useCallback(async () => {
-    console.log('handleSaveReceipt called');
+  const handleSaveReceiptWithSignatory = useCallback(async (signatoryData: Signatory) => {
+    console.log('handleSaveReceiptWithSignatory called with signatory:', signatoryData);
     try {
       setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
@@ -202,7 +202,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       };
 
       const receiptPayload: any = {
-        signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
+        signatory: signatoryData.id && signatoryData.id > 0 ? signatoryData.id : null,
         receipt_number: receiptNumber,
         payment: data.payment_id || null,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
@@ -249,7 +249,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     } finally {
       setSavingReceipt(false);
     }
-  }, [signatory, data]);
+  }, [data]);
+
+  const handleSaveReceipt = useCallback(async () => {
+    console.log('handleSaveReceipt called with current signatory state');
+    handleSaveReceiptWithSignatory(signatory);
+  }, [signatory, handleSaveReceiptWithSignatory]);
+
+  useEffect(() => {
+    // Fetch signatory for display
+    fetchSignatorySettings();
+  }, []);
 
   useEffect(() => {
     // Use sessionStorage to track if we've already saved for this data combo
@@ -266,16 +276,10 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     console.log('Marking as saved and proceeding with save');
     sessionStorage.setItem(cacheKey, 'true');
 
-    // Fetch signatory first, THEN save receipt with the loaded signatory
+    // Save receipt - backend will auto-fetch and assign active signatory
     (async () => {
-      console.log('Fetching signatory settings...');
-      await fetchSignatorySettings();
-      console.log('Settings fetched, signatory state should now be updated');
-      // Add small delay to ensure state is updated before saving
-      setTimeout(() => {
-        console.log('Now saving receipt with signatory...');
-        handleSaveReceipt();
-      }, 100);
+      console.log('Saving receipt - backend will auto-assign active signatory');
+      handleSaveReceipt();
     })();
   }, [data.reference_number, handleSaveReceipt]);
 
