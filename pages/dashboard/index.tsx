@@ -291,11 +291,11 @@ export default function BankDashboardPage() {
       setAllSubmissions(data);
 
       const username = currentUser?.username || user?.username;
-      const isAdmin = isAdminUser !== undefined ? isAdminUser : isAdmin;
+      const adminStatus = isAdminUser !== undefined ? isAdminUser : isAdmin;
 
       console.log('DEBUG: All submissions fetched:', data.length);
       console.log('DEBUG: Current user:', username);
-      console.log('DEBUG: Is admin:', isAdmin);
+      console.log('DEBUG: Is admin:', adminStatus);
       console.log('DEBUG: Selected date:', selectedDate);
       console.log('DEBUG: Access level:', paymentAccessLevel);
 
@@ -307,7 +307,7 @@ export default function BankDashboardPage() {
 
       // For admins with date_restricted access, apply date filter for DISPLAY only
       // For unrestricted access, show all submissions
-      if (isAdmin && paymentAccessLevel === 'date_restricted') {
+      if (adminStatus && paymentAccessLevel === 'date_restricted') {
         data = data.filter((sub: BankPaymentSubmission) => {
           const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
           return submissionDate === selectedDate;
@@ -317,13 +317,13 @@ export default function BankDashboardPage() {
       console.log('DEBUG: After access level filter:', data.length);
 
       // Filter by teller if admin selected one
-      if (isAdmin && selectedTeller) {
+      if (adminStatus && selectedTeller) {
         data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === selectedTeller);
       }
 
       // Tellers can only see their own records
       // If NOT an admin (i.e., they're a teller), filter to show only their records
-      if (!isAdmin && username) {
+      if (!adminStatus && username) {
         console.log('DEBUG: Applying teller filter for user:', username);
         data = data.filter((sub: BankPaymentSubmission) => {
           const match = sub.submitted_by_user === username;
