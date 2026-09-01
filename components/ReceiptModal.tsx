@@ -97,9 +97,11 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   };
 
   const handleSaveReceipt = useCallback(async () => {
+    console.log('handleSaveReceipt called');
     try {
       setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
+      console.log('About to save receipt with number:', receiptNumber);
 
       // Format date as YYYY-MM-DD
       const formatDateForBackend = (dateStr: any) => {
@@ -143,8 +145,9 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         payment_date: formatDateForBackend(data.payment_date),
       };
 
-      console.log('Saving receipt with payload:', receiptPayload);
-      await api.post('/receipts/', receiptPayload);
+      console.log('About to make API.POST call with payload:', receiptPayload);
+      const response = await api.post('/receipts/', receiptPayload);
+      console.log('API.POST returned:', response.data);
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
@@ -176,13 +179,22 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   }, [signatory, data]);
 
   useEffect(() => {
+    console.log('ReceiptModal useEffect ran, saveAttemptedRef.current:', saveAttemptedRef.current);
+
     // Guard: only run once per component mount
-    if (saveAttemptedRef.current) return;
+    if (saveAttemptedRef.current) {
+      console.log('Skipping - already attempted save');
+      return;
+    }
+
+    console.log('Setting saveAttemptedRef to true and proceeding with save');
     saveAttemptedRef.current = true;
 
     // Fetch signatory and save receipt
     (async () => {
+      console.log('Fetching signatory settings...');
       await fetchSignatorySettings();
+      console.log('Settings fetched, now saving receipt...');
       // Save after settings are fetched
       handleSaveReceipt();
     })();
