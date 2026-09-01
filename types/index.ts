@@ -21,6 +21,17 @@ export interface BankPaymentSubmission {
   submitted_at: string;
   verified_at: string;
   error_message?: string;
+  pilgrim?: {
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    email: string;
+    passport_number?: string;
+    date_of_birth?: string;
+    gender?: string;
+  };
+  payer_name?: string;
+  payer_relationship?: string;
 }
 
 export interface ManualPaymentData {
