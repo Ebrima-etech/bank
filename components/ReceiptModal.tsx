@@ -224,6 +224,13 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
+
+      // Open PDF in new tab if receipt ID is available
+      if (response.data && response.data.id) {
+        const pdfUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/receipts/${response.data.id}/pdf/`;
+        console.log('Opening PDF in new tab:', pdfUrl);
+        window.open(pdfUrl, '_blank');
+      }
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
       console.error('Error response:', error.response);
