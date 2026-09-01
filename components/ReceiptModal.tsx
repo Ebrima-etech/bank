@@ -225,9 +225,9 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
 
-      // Generate and download PDF
-      setTimeout(async () => {
-        await generateAndDownloadPDF(receiptNumber);
+      // Open print dialog to save as PDF
+      setTimeout(() => {
+        window.print();
       }, 500);
 
     } catch (error: any) {
@@ -288,30 +288,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       handleSaveReceipt();
     })();
   }, [data.reference_number, handleSaveReceipt]);
-
-  const generateAndDownloadPDF = async (receiptNumber: string) => {
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.querySelector('.receipt-print-container');
-      if (!element) {
-        console.error('Receipt container not found');
-        return;
-      }
-
-      const opt = {
-        margin: 10,
-        filename: `Receipt_${receiptNumber}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-      };
-
-      html2pdf().set(opt).from(element).save();
-      console.log('PDF generated and downloaded:', receiptNumber);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
 
   const handlePrint = () => {
     window.print();
