@@ -17,6 +17,7 @@ interface ReceiptData {
   registration_id?: string;
   payer_name: string;
   payer_relationship: string;
+  payment_id?: number;
 }
 
 interface Signatory {
@@ -133,6 +134,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
         reference_number: data.reference_number,
+        payment: data.payment_id || null,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
         pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
         pilgrim_email: cleanValue(data.pilgrim_email),

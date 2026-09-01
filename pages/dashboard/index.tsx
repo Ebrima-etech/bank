@@ -53,7 +53,7 @@ export default function BankDashboardPage() {
     pending: 0,
   });
 
-  const handleOpenReceipt = (submission: BankPaymentSubmission) => {
+  const handleOpenReceipt = async (submission: BankPaymentSubmission) => {
     console.log('Opening receipt for submission:', submission);
 
     // Format date as YYYY-MM-DD for backend - use submitted_at directly
@@ -76,7 +76,21 @@ export default function BankDashboardPage() {
       return date.toISOString().split('T')[0];
     };
 
-    const receiptData = {
+    const referenceNumber = submission.reference_number || `REF${submission.id}`;
+    let paymentId: number | undefined;
+
+    // Fetch the Payment ID from GIA backend
+    try {
+      const response = await api.get(`/payments/?reference_number=${referenceNumber}`);
+      if (response.data && response.data.results && response.data.results.length > 0) {
+        paymentId = response.data.results[0].id;
+        console.log('Found payment ID:', paymentId);
+      }
+    } catch (error) {
+      console.warn('Failed to fetch payment:', error);
+    }
+
+    const receiptData: any = {
       pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || 'Unknown',
       pilgrim_last_name: submission.pilgrim_last_name || submission.pilgrim?.last_name || 'Unknown',
       pilgrim_phone: submission.pilgrim_phone || submission.pilgrim?.phone_number || '',
@@ -85,16 +99,16 @@ export default function BankDashboardPage() {
       pilgrim_date_of_birth: submission.pilgrim_date_of_birth || submission.pilgrim?.date_of_birth || '',
       pilgrim_gender: submission.pilgrim_gender || submission.pilgrim?.gender || 'M',
       amount: submission.amount || 0,
-      reference_number: submission.reference_number || `REF${submission.id}`,
+      reference_number: referenceNumber,
       payment_date: formatDateForBackend(submission.submitted_at),
       registration_id: `REC${submission.id}`,
       payer_name: submission.payer_name || 'Unknown',
       payer_relationship: submission.payer_relationship || '',
+      payment_id: paymentId,
     };
 
     console.log('Formatted payment_date:', receiptData.payment_date, 'from:', submission.submitted_at);
-
-    console.log('Receipt data:', receiptData);
+    console.log('Receipt data with payment_id:', receiptData);
     setSelectedReceipt(receiptData);
   };
 
