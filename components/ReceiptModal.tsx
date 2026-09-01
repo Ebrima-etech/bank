@@ -62,17 +62,22 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const [receiptSaved, setReceiptSaved] = useState(false);
   const [savingReceipt, setSavingReceipt] = useState(false);
-  const hasAttemptedSave = useRef(false);
+  const saveAttemptedRef = useRef(false);
 
   useEffect(() => {
-    // Only fetch settings on component mount
     fetchSignatorySettings();
-    // Auto-save receipt only once (prevent StrictMode double-call)
-    if (!hasAttemptedSave.current) {
-      hasAttemptedSave.current = true;
+
+    // Save receipt exactly once
+    // Use ref to survive StrictMode double-render
+    if (!saveAttemptedRef.current) {
+      saveAttemptedRef.current = true;
       handleSaveReceipt();
     }
-  }, []); // Empty dependency array ensures this runs only once
+
+    return () => {
+      // Cleanup: don't reset the ref
+    };
+  }, []);
 
   const fetchSignatorySettings = async () => {
     try {
