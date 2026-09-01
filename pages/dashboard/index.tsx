@@ -663,36 +663,60 @@ export default function BankDashboardPage() {
         </div>
       </div>
 
-      {generatingReceipt && selectedReceipt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+      {selectedReceipt && (
+        <>
+          {generatingReceipt && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+                <div className="mb-6 flex justify-center">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Generating Receipt</h3>
+                <p className="text-gray-600">Please wait while we prepare your receipt...</p>
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Generating Receipt</h3>
-            <p className="text-gray-600">Please wait while we prepare your receipt...</p>
-          </div>
-        </div>
-      )}
+          )}
 
-      {selectedReceipt && !generatingReceipt && (
-        <ReceiptModal
-          data={selectedReceipt}
-          onClose={() => handleCloseReceipt()}
-          onReceiptSaved={() => {
-            handleReceiptSaved();
-            // Find the submission ID from the data and mark it as generated
-            const submissionId = submissions.find(sub =>
-              sub.reference_number === selectedReceipt.reference_number ||
-              sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
-            )?.id;
-            if (submissionId) {
-              handleReceiptGenerated(submissionId);
-            }
-          }}
+          {!generatingReceipt && (
+            <ReceiptModal
+              data={selectedReceipt}
+              onClose={() => handleCloseReceipt()}
+              onReceiptSaved={() => {
+                handleReceiptSaved();
+                // Find the submission ID from the data and mark it as generated
+                const submissionId = submissions.find(sub =>
+                  sub.reference_number === selectedReceipt.reference_number ||
+                  sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
+                )?.id;
+                if (submissionId) {
+                  handleReceiptGenerated(submissionId);
+                }
+              }}
+            />
+          )}
+
+          {generatingReceipt && (
+            <ReceiptModal
+              data={selectedReceipt}
+              onClose={() => handleCloseReceipt()}
+              onReceiptSaved={() => {
+                handleReceiptSaved();
+                // Find the submission ID from the data and mark it as generated
+                const submissionId = submissions.find(sub =>
+                  sub.reference_number === selectedReceipt.reference_number ||
+                  sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
+                )?.id;
+                if (submissionId) {
+                  handleReceiptGenerated(submissionId);
+                }
+              }}
+            />
+          )}
+        </>
+      )}
         />
       )}
     </Layout>
