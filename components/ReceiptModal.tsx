@@ -7,21 +7,49 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 const printStyles = `
   @media print {
     * {
-      margin: 0;
-      padding: 0;
+      margin: 0 !important;
+      padding: 0 !important;
       box-sizing: border-box;
     }
-    body {
-      margin: 0;
-      padding: 0;
-      background: white;
-    }
-    html, body, #__next {
+
+    body, html {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
       width: 100% !important;
       height: 100% !important;
     }
+
+    /* Hide everything by default */
+    body > * {
+      display: none !important;
+    }
+
+    /* Show only the receipt modal and its ancestors */
+    .receipt-print-container {
+      display: block !important;
+      position: static !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: white !important;
+    }
+
+    .receipt-print-container > div {
+      display: block !important;
+      position: static !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+      background: white !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      padding: 0.5in !important;
+    }
+
     @page {
-      margin: 0.5in;
+      margin: 0;
       size: A4;
     }
   }
@@ -246,8 +274,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   const receiptTime = currentTime.toLocaleTimeString('en-GM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-w-full print:max-h-none print:rounded-none print:shadow-none">
+    <div className="receipt-print-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-w-full print:max-h-none print:rounded-none print:shadow-none print:overflow-visible">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between print:hidden">
           <h2 className="text-xl font-bold text-gray-900">Payment Receipt</h2>
