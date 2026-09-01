@@ -128,21 +128,30 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const fetchSignatorySettings = async () => {
     try {
+      // Check if we have cached signatory
+      const cachedSignatory = sessionStorage.getItem('cached_signatory');
+      const cachedSettings = sessionStorage.getItem('cached_settings');
+
+      if (cachedSignatory && cachedSettings) {
+        console.log('Using cached signatory and settings');
+        setSignatory(JSON.parse(cachedSignatory));
+        setGlobalSettings(JSON.parse(cachedSettings));
+        return;
+      }
+
       // Fetch active signatory from GIA backend
       const signatoryResponse = await api.get('/signatories/');
       console.log('Signatories response:', signatoryResponse.data);
 
       if (signatoryResponse.data && Array.isArray(signatoryResponse.data)) {
         const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
-        if (activeSignatory) {
-          console.log('Active signatory found:', activeSignatory);
-          setSignatory(activeSignatory);
-        } else {
-          // If no active signatory, use first one
-          if (signatoryResponse.data.length > 0) {
-            console.log('No active signatory, using first:', signatoryResponse.data[0]);
-            setSignatory(signatoryResponse.data[0]);
-          }
+        const signatoryToUse = activeSignatory || signatoryResponse.data[0];
+
+        if (signatoryToUse) {
+          console.log('Signatory found:', signatoryToUse);
+          setSignatory(signatoryToUse);
+          // Cache for future use
+          sessionStorage.setItem('cached_signatory', JSON.stringify(signatoryToUse));
         }
       }
 
@@ -151,6 +160,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       if (settingsResponse.data) {
         console.log('Settings response:', settingsResponse.data);
         setGlobalSettings(settingsResponse.data);
+        // Cache for future use
+        sessionStorage.setItem('cached_settings', JSON.stringify(settingsResponse.data));
       }
     } catch (error) {
       console.error('Failed to load signatory settings:', error);
@@ -255,15 +266,18 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     console.log('Marking as saved and proceeding with save');
     sessionStorage.setItem(cacheKey, 'true');
 
-    // Fetch signatory and save receipt
+    // Fetch signatory first, THEN save receipt with the loaded signatory
     (async () => {
       console.log('Fetching signatory settings...');
       await fetchSignatorySettings();
-      console.log('Settings fetched, now saving receipt...');
-      // Save after settings are fetched
-      handleSaveReceipt();
+      console.log('Settings fetched, signatory state should now be updated');
+      // Add small delay to ensure state is updated before saving
+      setTimeout(() => {
+        console.log('Now saving receipt with signatory...');
+        handleSaveReceipt();
+      }, 100);
     })();
-  }, [data.reference_number]);
+  }, [data.reference_number, handleSaveReceipt]);
 
   const handlePrint = () => {
     window.print();
