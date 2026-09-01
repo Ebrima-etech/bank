@@ -128,33 +128,51 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const fetchSignatorySettings = async () => {
     try {
+      console.log('Fetching signatories...');
       // Fetch active signatory from GIA backend
       const signatoryResponse = await api.get('/signatories/');
-      console.log('Signatories response:', signatoryResponse.data);
+      console.log('Signatories response status:', signatoryResponse.status);
+      console.log('Signatories response data:', signatoryResponse.data);
 
-      if (signatoryResponse.data && Array.isArray(signatoryResponse.data) && signatoryResponse.data.length > 0) {
-        const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
-        const signatoryToUse = activeSignatory || signatoryResponse.data[0];
+      if (signatoryResponse.data && Array.isArray(signatoryResponse.data)) {
+        console.log('Signatories count:', signatoryResponse.data.length);
 
-        if (signatoryToUse && signatoryToUse.id > 0) {
-          console.log('Signatory found:', signatoryToUse);
-          setSignatory(signatoryToUse);
+        if (signatoryResponse.data.length > 0) {
+          const activeSignatory = signatoryResponse.data.find((s: any) => s.is_active);
+          const signatoryToUse = activeSignatory || signatoryResponse.data[0];
+
+          console.log('Active signatory found:', activeSignatory?.signatory_name);
+          console.log('Using signatory:', signatoryToUse.signatory_name);
+
+          if (signatoryToUse && signatoryToUse.id > 0) {
+            console.log('Setting signatory state:', signatoryToUse);
+            setSignatory(signatoryToUse);
+          } else {
+            console.warn('Signatory id is invalid:', signatoryToUse?.id);
+          }
+        } else {
+          console.warn('No signatories returned from API');
         }
+      } else {
+        console.warn('Signatories response is not an array:', typeof signatoryResponse.data);
       }
 
       // Also fetch global settings
       try {
+        console.log('Fetching global settings...');
         const settingsResponse = await api.get('/settings/signatory/');
         if (settingsResponse.data) {
           console.log('Settings response:', settingsResponse.data);
           setGlobalSettings(settingsResponse.data);
         }
       } catch (settingsError) {
-        console.warn('Failed to load settings, using defaults:', settingsError);
+        console.warn('Failed to load settings:', settingsError);
       }
     } catch (error) {
-      console.error('Failed to load signatory settings:', error);
-      // Use defaults if fetch fails
+      console.error('Failed to load signatory settings - detailed error:', {
+        message: error instanceof Error ? error.message : String(error),
+        error: error,
+      });
     }
   };
 
@@ -264,7 +282,10 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   useEffect(() => {
     // Fetch signatory for display
-    fetchSignatorySettings();
+    console.log('ReceiptModal mounted, fetching signatory settings...');
+    fetchSignatorySettings().catch(err => {
+      console.error('Error in fetchSignatorySettings:', err);
+    });
   }, []);
 
   useEffect(() => {
