@@ -40,6 +40,7 @@ interface ReceiptModalProps {
   data: ReceiptData;
   onClose: () => void;
   onReceiptSaved?: () => void;
+  paymentId?: number;
 }
 
 export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptModalProps) {
@@ -131,6 +132,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       const receiptPayload: any = {
         signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
+        reference_number: data.reference_number,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
         pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
         pilgrim_email: cleanValue(data.pilgrim_email),
@@ -143,9 +145,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         amount: data.amount || 0,
         payment_date: formatDateForBackend(data.payment_date),
       };
-
-      // Don't send payment field - it's optional and we don't have a payment ID
-      delete receiptPayload.payment;
 
       console.log('Saving receipt with payload:', receiptPayload);
       await api.post('/receipts/', receiptPayload);
