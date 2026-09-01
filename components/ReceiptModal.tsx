@@ -2,7 +2,6 @@ import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import html2pdf from 'html2pdf.js';
 
 // Print styles for professional receipt printing
 const printStyles = `
@@ -227,8 +226,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       console.log('Receipt saved successfully:', receiptNumber);
 
       // Generate and download PDF
-      setTimeout(() => {
-        generateAndDownloadPDF(receiptNumber);
+      setTimeout(async () => {
+        await generateAndDownloadPDF(receiptNumber);
       }, 500);
 
     } catch (error: any) {
@@ -290,22 +289,28 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     })();
   }, [data.reference_number, handleSaveReceipt]);
 
-  const generateAndDownloadPDF = (receiptNumber: string) => {
-    const element = document.querySelector('.receipt-print-container');
-    if (!element) {
-      console.error('Receipt container not found');
-      return;
+  const generateAndDownloadPDF = async (receiptNumber: string) => {
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.querySelector('.receipt-print-container');
+      if (!element) {
+        console.error('Receipt container not found');
+        return;
+      }
+
+      const opt = {
+        margin: 10,
+        filename: `Receipt_${receiptNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+      console.log('PDF generated and downloaded:', receiptNumber);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
     }
-
-    const opt = {
-      margin: 10,
-      filename: `Receipt_${receiptNumber}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-    };
-
-    html2pdf().set(opt).from(element).save();
   };
 
   const handlePrint = () => {
