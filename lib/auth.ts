@@ -78,5 +78,5 @@ export const getUserRole = async (userId: number): Promise<string | null> => {
 
 export const isBankUser = async (userId: number): Promise<boolean> => {
   const role = await getUserRole(userId);
-  return role && (role === 'bank_admin' || role === 'bank_staff');
+  return !!(role && (role === 'bank_admin' || role === 'bank_staff'));
 };
