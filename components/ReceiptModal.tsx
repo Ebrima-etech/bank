@@ -1,7 +1,7 @@
 import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface ReceiptData {
   pilgrim_first_name: string;
@@ -62,11 +62,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const [receiptSaved, setReceiptSaved] = useState(false);
   const [savingReceipt, setSavingReceipt] = useState(false);
+  const hasAttemptedSave = useRef(false);
 
   useEffect(() => {
+    // Only fetch settings on component mount
     fetchSignatorySettings();
-    handleSaveReceipt();
-  }, []);
+    // Auto-save receipt only once (prevent StrictMode double-call)
+    if (!hasAttemptedSave.current) {
+      hasAttemptedSave.current = true;
+      handleSaveReceipt();
+    }
+  }, []); // Empty dependency array ensures this runs only once
 
   const fetchSignatorySettings = async () => {
     try {
