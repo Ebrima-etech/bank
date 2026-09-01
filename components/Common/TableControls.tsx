@@ -76,7 +76,7 @@ export function TableFilter({ label, value, options, onChange, multi = false }: 
         >
           <option value="">All</option>
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={String(option.value)} value={option.value}>
               {option.label}
             </option>
           ))}
