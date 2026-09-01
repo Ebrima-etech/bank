@@ -2,6 +2,7 @@ import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import html2pdf from 'html2pdf.js';
 
 // Print styles for professional receipt printing
 const printStyles = `
@@ -225,12 +226,11 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
 
-      // Open PDF in new tab if receipt ID is available
-      if (response.data && response.data.id) {
-        const pdfUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/receipts/${response.data.id}/pdf/`;
-        console.log('Opening PDF in new tab:', pdfUrl);
-        window.open(pdfUrl, '_blank');
-      }
+      // Generate and download PDF
+      setTimeout(() => {
+        generateAndDownloadPDF(receiptNumber);
+      }, 500);
+
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
       console.error('Error response:', error.response);
@@ -289,6 +289,24 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       handleSaveReceipt();
     })();
   }, [data.reference_number, handleSaveReceipt]);
+
+  const generateAndDownloadPDF = (receiptNumber: string) => {
+    const element = document.querySelector('.receipt-print-container');
+    if (!element) {
+      console.error('Receipt container not found');
+      return;
+    }
+
+    const opt = {
+      margin: 10,
+      filename: `Receipt_${receiptNumber}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+  };
 
   const handlePrint = () => {
     window.print();
