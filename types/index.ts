@@ -10,6 +10,7 @@ export interface BankPaymentSubmission {
   id: string;
   bank: number;
   pilgrim_id: string;
+  payment?: number;
   amount: number;
   reference_number: string;
   status: 'pending' | 'verified' | 'failed';

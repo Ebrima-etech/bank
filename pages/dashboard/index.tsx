@@ -53,7 +53,7 @@ export default function BankDashboardPage() {
     pending: 0,
   });
 
-  const handleOpenReceipt = async (submission: BankPaymentSubmission) => {
+  const handleOpenReceipt = (submission: BankPaymentSubmission) => {
     console.log('Opening receipt for submission:', submission);
 
     // Format date as YYYY-MM-DD for backend - use submitted_at directly
@@ -77,18 +77,6 @@ export default function BankDashboardPage() {
     };
 
     const referenceNumber = submission.reference_number || `REF${submission.id}`;
-    let paymentId: number | undefined;
-
-    // Fetch the Payment ID from GIA backend
-    try {
-      const response = await api.get(`/payments/?reference_number=${referenceNumber}`);
-      if (response.data && response.data.results && response.data.results.length > 0) {
-        paymentId = response.data.results[0].id;
-        console.log('Found payment ID:', paymentId);
-      }
-    } catch (error) {
-      console.warn('Failed to fetch payment:', error);
-    }
 
     const receiptData: any = {
       pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || 'Unknown',
@@ -104,7 +92,7 @@ export default function BankDashboardPage() {
       registration_id: `REC${submission.id}`,
       payer_name: submission.payer_name || 'Unknown',
       payer_relationship: submission.payer_relationship || '',
-      payment_id: paymentId,
+      payment_id: submission.payment,
     };
 
     console.log('Formatted payment_date:', receiptData.payment_date, 'from:', submission.submitted_at);
