@@ -175,17 +175,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     }
   }, [signatory, data]);
 
-  // Fetch signatory settings on mount
   useEffect(() => {
-    fetchSignatorySettings();
-  }, []);
+    // Guard: only run once per component mount
+    if (saveAttemptedRef.current) return;
+    saveAttemptedRef.current = true;
 
-  // Save receipt exactly once on mount (after settings are available)
-  useEffect(() => {
-    if (!saveAttemptedRef.current) {
-      saveAttemptedRef.current = true;
+    // Fetch signatory and save receipt
+    (async () => {
+      await fetchSignatorySettings();
+      // Save after settings are fetched
       handleSaveReceipt();
-    }
+    })();
   }, []);
 
   const handlePrint = () => {
