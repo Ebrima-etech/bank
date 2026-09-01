@@ -1,7 +1,9 @@
-import { BiX, BiPrinter } from 'react-icons/bi';
+import { BiX } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Print styles for professional receipt printing
 const printStyles = `
@@ -97,6 +99,9 @@ interface ReceiptModalProps {
 }
 
 export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptModalProps) {
+  const hasInitiatedSaveRef = useRef(false);
+
+  const [signatoryLoaded, setSignatoryLoaded] = useState(false);
   const [signatory, setSignatory] = useState<Signatory>({
     id: 0,
     signatory_name: 'GIA Bank Admin',
@@ -168,11 +173,16 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       } catch (settingsError) {
         console.warn('Failed to load settings:', settingsError);
       }
+
+      // Mark signatory as loaded
+      setSignatoryLoaded(true);
     } catch (error) {
       console.error('Failed to load signatory settings - detailed error:', {
         message: error instanceof Error ? error.message : String(error),
         error: error,
       });
+      // Still mark as loaded even if there's an error
+      setSignatoryLoaded(true);
     }
   };
 
@@ -242,11 +252,18 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
+      console.log('Setting timeout to generate PDF...');
 
-      // Open print dialog to save as PDF
-      setTimeout(() => {
-        window.print();
-      }, 500);
+      // Generate and open PDF in new tab, then close modal
+      const timeoutId = setTimeout(async () => {
+        console.log('Timeout fired! About to call generateAndOpenPDF');
+        console.log('Current signatory state:', signatory);
+        await generateAndOpenPDF(receiptNumber, signatory);
+        console.log('PDF generated, closing modal');
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }, 1000);
 
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
@@ -275,10 +292,10 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     }
   }, [data]);
 
-  const handleSaveReceipt = useCallback(async () => {
+  const handleSaveReceipt = () => {
     console.log('handleSaveReceipt called with current signatory state');
     handleSaveReceiptWithSignatory(signatory);
-  }, [signatory, handleSaveReceiptWithSignatory]);
+  };
 
   useEffect(() => {
     // Fetch signatory for display
@@ -289,248 +306,301 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   }, []);
 
   useEffect(() => {
-    // Use sessionStorage to track if we've already saved for this data combo
-    const cacheKey = `receipt_saved_${data.reference_number}`;
-    const alreadySaved = sessionStorage.getItem(cacheKey);
-
-    console.log('ReceiptModal useEffect ran for ref:', data.reference_number, 'alreadySaved:', alreadySaved);
-
-    if (alreadySaved) {
-      console.log('Skipping - already saved this receipt');
+    // Only initiate save once per modal instance
+    if (hasInitiatedSaveRef.current) {
+      console.log('Save already initiated, skipping');
       return;
     }
 
-    console.log('Marking as saved and proceeding with save');
-    sessionStorage.setItem(cacheKey, 'true');
+    // Wait for signatory to be loaded (not the default value)
+    if (signatory.signatory_name === 'GIA Bank Admin') {
+      console.log('Waiting for signatory to load before saving...');
+      return;
+    }
+
+    console.log('ReceiptModal useEffect - starting save for ref:', data.reference_number);
+    hasInitiatedSaveRef.current = true;
 
     // Save receipt - backend will auto-fetch and assign active signatory
-    (async () => {
-      console.log('Saving receipt - backend will auto-assign active signatory');
-      handleSaveReceipt();
-    })();
-  }, [data.reference_number, handleSaveReceipt]);
+    handleSaveReceipt();
+  }, [data.reference_number, signatory]);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const generateAndOpenPDF = useCallback(async (receiptNumber: string, signatoryData?: Signatory) => {
+    try {
+      const sigToUse = signatoryData || signatory;
+
+      // Check if signatory has been loaded
+      if (!sigToUse || !sigToUse.signatory_name || sigToUse.signatory_name === 'GIA Bank Admin') {
+        console.log('Signatory not yet loaded, waiting...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return generateAndOpenPDF(receiptNumber, sigToUse);
+      }
+
+      console.log('Signatory loaded:', sigToUse.signatory_name);
+      console.log('Waiting 200ms for all elements to render...');
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      console.log('Starting PDF generation for receipt:', receiptNumber);
+      const container = document.querySelector('.receipt-print-container > div') as HTMLElement;
+      if (!container) {
+        console.error('Receipt element not found');
+        return;
+      }
+
+      console.log('Container found, waiting for images to load...');
+
+      // Wait for all images to load
+      const images = container.querySelectorAll('img');
+      console.log('Found', images.length, 'images to load');
+
+      const imageLoadPromises = Array.from(images).map(img => {
+        return new Promise(resolve => {
+          if (img.complete) {
+            console.log('Image already loaded:', img.src);
+            resolve(null);
+          } else {
+            img.onload = () => {
+              console.log('Image loaded:', img.src);
+              resolve(null);
+            };
+            img.onerror = () => {
+              console.warn('Image failed to load:', img.src);
+              resolve(null);
+            };
+            setTimeout(() => resolve(null), 3000);
+          }
+        });
+      });
+
+      await Promise.all(imageLoadPromises);
+      console.log('All images loaded, capturing...');
+
+      console.log('Converting to canvas with html2canvas...');
+      const canvas = await html2canvas(container, {
+        scale: 1.2,
+        logging: false,
+        backgroundColor: '#ffffff',
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 10000,
+        windowHeight: container.scrollHeight,
+        windowWidth: container.scrollWidth,
+      });
+
+      console.log('Canvas created, size:', canvas.width, 'x', canvas.height);
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let finalWidth = imgWidth;
+      let finalHeight = imgHeight;
+
+      if (imgHeight > pageHeight - 20) {
+        const scaleFactor = (pageHeight - 20) / imgHeight;
+        finalWidth = imgWidth * scaleFactor;
+        finalHeight = pageHeight - 20;
+      }
+
+      console.log('Adding image to PDF...');
+      pdf.addImage(imgData, 'PNG', 10, 10, finalWidth, finalHeight);
+      console.log('Image added successfully');
+
+      console.log('Creating PDF blob...');
+      const pdfBlob = pdf.output('blob');
+      console.log('PDF blob created:', pdfBlob.size, 'bytes');
+
+      console.log('Creating object URL...');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      console.log('PDF URL created:', pdfUrl);
+
+      console.log('Waiting 100ms before opening in new tab...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      console.log('Opening new window...');
+      const newWindow = window.open(pdfUrl, '_blank');
+      console.log('Window open result:', newWindow);
+
+      if (!newWindow) {
+        console.error('Failed to open new window - popup blocked');
+      } else {
+        console.log('PDF opened successfully');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      console.error('Error details:', error);
+    }
+  }, [signatory]);
+
 
   const registrationId = data.registration_id || `REF${Date.now().toString().slice(-8)}`;
   const currentTime = new Date();
   const receiptTime = currentTime.toLocaleTimeString('en-GM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+  // Show loading screen while signatory is loading
+  if (!signatoryLoaded) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-gray-300 border-t-emerald-600 rounded-full animate-spin"></div>
+          <p className="text-gray-700 font-medium">Preparing receipt...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="receipt-print-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-w-full print:max-h-none print:rounded-none print:shadow-none print:overflow-visible">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between print:hidden">
-          <h2 className="text-xl font-bold text-gray-900">Payment Receipt</h2>
-          <div className="flex items-center gap-2">
-            {receiptSaved && (
-              <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-sm flex items-center gap-2">
-                <span>✓</span>
-                <span>Receipt Saved</span>
+        {/* Receipt Content */}
+        <div className="p-6 print:p-6 print:max-w-full print:m-0 print:bg-white" style={{ maxWidth: '600px', margin: '0 auto' }}>
+          {/* Header */}
+          <div className="text-center mb-4 pb-4 border-b border-gray-300">
+            <h1 className="text-xl font-bold text-gray-900">GIA BANK PORTAL</h1>
+            <p className="text-xs text-gray-600 mt-1">Gambia International Airlines</p>
+            <p className="text-xs text-gray-500">PAYMENT RECEIPT</p>
+
+            {/* Stamp */}
+            {signatory.official_stamp && (
+              <div className="mt-3 flex justify-center">
+                <img
+                  src={signatory.official_stamp}
+                  alt="Official Stamp"
+                  className="w-16 h-16 opacity-70 print:opacity-100 object-contain"
+                />
               </div>
             )}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              <BiPrinter size={18} />
-              Print
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <BiX size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Receipt Content */}
-        <div className="p-8 print:p-12 print:max-w-full print:m-0 print:bg-white">
-          {/* Official Header with Stamp */}
-          <div className="relative text-center mb-8 pb-6 border-b-2 border-gray-400">
-            <h1 className="text-3xl font-bold text-gray-900">GIA Bank Portal</h1>
-            <p className="text-gray-600 mt-1 font-semibold">Gambia International Airlines</p>
-            <p className="text-sm text-gray-500 mt-1">Official Payment Receipt</p>
-
-            {/* Official Stamp */}
-            {signatory.official_stamp ? (
-              <img
-                src={signatory.official_stamp}
-                alt="Official Stamp"
-                className="absolute top-2 right-4 w-20 h-20 opacity-80 print:opacity-100 object-contain"
-              />
-            ) : (
-              <svg
-                className="absolute top-2 right-4 w-20 h-20 opacity-80 print:opacity-100"
-                viewBox="0 0 100 100"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.3"/>
-                  </filter>
-                </defs>
-                <circle cx="50" cy="50" r="45" fill="none" stroke={signatory.stamp_color} strokeWidth="2" filter="url(#shadow)" opacity="0.6" strokeDasharray="3,2"/>
-                <circle cx="50" cy="50" r="38" fill="none" stroke={signatory.stamp_color} strokeWidth="1" opacity="0.5"/>
-                <text x="50" y="35" textAnchor="middle" fontSize="8" fontWeight="bold" fill={signatory.stamp_color} opacity="0.7">OFFICIAL</text>
-                <text x="50" y="47" textAnchor="middle" fontSize="7" fill={signatory.stamp_color} opacity="0.7">RECEIPT</text>
-                <text x="50" y="58" textAnchor="middle" fontSize="7" fill={signatory.stamp_color} opacity="0.7">VERIFIED</text>
-              </svg>
-            )}
           </div>
 
-          {/* Receipt Reference Numbers */}
-          <div className="grid grid-cols-3 gap-3 mb-8 pb-6 border-b-2 border-gray-300">
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
-              <p className="text-xs text-gray-600 font-semibold uppercase">Receipt Number</p>
-              <p className="text-sm font-mono text-gray-900 mt-1 font-bold">{registrationId}</p>
+          {/* Receipt Details */}
+          <div className="mb-4 pb-4 border-b border-gray-300 text-sm">
+            <div className="flex justify-between mb-1">
+              <span className="text-gray-600">Receipt #:</span>
+              <span className="font-mono font-semibold">{registrationId}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
-              <p className="text-xs text-gray-600 font-semibold uppercase">Reference ID</p>
-              <p className="text-sm font-mono text-gray-900 mt-1 font-bold">{data.reference_number}</p>
+            <div className="flex justify-between mb-1">
+              <span className="text-gray-600">Reference #:</span>
+              <span className="font-mono font-semibold">{data.reference_number}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
-              <p className="text-xs text-gray-600 font-semibold uppercase">Date & Time</p>
-              <p className="text-xs font-mono text-gray-900 mt-1">{currentTime.toLocaleDateString('en-GM')}</p>
-              <p className="text-xs font-mono text-gray-900">{receiptTime}</p>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Date & Time:</span>
+              <span className="font-mono text-xs">{currentTime.toLocaleDateString('en-GM')} {receiptTime}</span>
             </div>
           </div>
 
           {/* Pilgrim Information */}
-          <div className="mb-8">
-            <div className="bg-emerald-50 border-l-4 border-emerald-600 px-4 py-3 mb-4 rounded-r">
-              <h3 className="text-sm font-bold text-emerald-900 uppercase">Pilgrim Information</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Full Name</p>
-                <p className="text-sm text-gray-900 mt-1 font-medium">
-                  {data.pilgrim_first_name} {data.pilgrim_last_name}
-                </p>
+          <div className="mb-4 pb-4 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-2">PILGRIM</p>
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Name:</span>
+                <span>{data.pilgrim_first_name} {data.pilgrim_last_name}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Gender</p>
-                <p className="text-sm text-gray-900 mt-1">
-                  {data.pilgrim_gender === 'M' ? 'Male (Alagie)' : 'Female (Aja)'}
-                </p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Gender:</span>
+                <span>{data.pilgrim_gender === 'M' ? 'Male' : 'Female'}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Date of Birth</p>
-                <p className="text-sm text-gray-900 mt-1">{data.pilgrim_date_of_birth}</p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">DOB:</span>
+                <span className="text-xs">{data.pilgrim_date_of_birth || 'N/A'}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Passport Number</p>
-                <p className="text-sm text-gray-900 mt-1 font-mono">{data.pilgrim_passport_number}</p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Passport:</span>
+                <span className="font-mono text-xs">{data.pilgrim_passport_number || 'N/A'}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Phone</p>
-                <p className="text-sm text-gray-900 mt-1 font-mono">{data.pilgrim_phone}</p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Phone:</span>
+                <span className="font-mono text-xs">{data.pilgrim_phone}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Email</p>
-                <p className="text-sm text-gray-900 mt-1 font-mono break-all text-xs">{data.pilgrim_email || 'N/A'}</p>
-              </div>
+              {data.pilgrim_email && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Email:</span>
+                  <span className="font-mono text-xs">{data.pilgrim_email}</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Payer Information */}
-          <div className="mb-8">
-            <div className="bg-blue-50 border-l-4 border-blue-600 px-4 py-3 mb-4 rounded-r">
-              <h3 className="text-sm font-bold text-blue-900 uppercase">Payer Information</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border border-gray-200 p-3 rounded col-span-2 md:col-span-1">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Payer Name</p>
-                <p className="text-sm text-gray-900 mt-1 font-medium">{data.payer_name}</p>
+          <div className="mb-4 pb-4 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-2">PAYER</p>
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Name:</span>
+                <span>{data.payer_name}</span>
               </div>
-              <div className="border border-gray-200 p-3 rounded col-span-2 md:col-span-1">
-                <p className="text-xs text-gray-600 font-semibold uppercase">Relationship</p>
-                <p className="text-sm text-gray-900 mt-1">{data.payer_relationship}</p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Relationship:</span>
+                <span>{data.payer_relationship}</span>
               </div>
             </div>
           </div>
 
-          {/* Payment Summary - Highlighted */}
-          <div className="mb-8">
-            <div className="bg-emerald-50 border-2 border-emerald-600 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-emerald-900 mb-4 uppercase">Payment Summary</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b-2 border-emerald-300">
-                  <span className="text-gray-700 font-medium">Amount Paid:</span>
-                  <span className="text-3xl font-bold text-emerald-600">{formatCurrency(data.amount)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Payment Date:</span>
-                  <span className="text-sm font-mono text-gray-900">{data.payment_date}</span>
-                </div>
-              </div>
+          {/* Amount */}
+          <div className="mb-4 pb-4 border-b border-gray-300">
+            <div className="text-center">
+              <p className="text-xs text-gray-600 font-semibold mb-2">AMOUNT PAID</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(data.amount)}</p>
+              <p className="text-xs text-gray-600 mt-2">Date: {data.payment_date}</p>
             </div>
           </div>
 
-          {/* Digital Signature Section */}
-          <div className="mb-8 pt-8 border-t-2 border-gray-300">
-            <h3 className="text-sm font-bold text-gray-900 uppercase mb-6">Authorization & Digital Signature</h3>
-            <div className="grid grid-cols-2 gap-8">
-              {/* Authorized Officer */}
-              <div className="text-center">
-                <div className="h-16 border-b-2 border-gray-400 mb-2 flex items-center justify-center overflow-hidden">
-                  {signatory.digital_signature ? (
-                    <img
-                      src={signatory.digital_signature}
-                      alt="Digital Signature"
-                      className="max-w-full max-h-16 object-contain"
-                    />
-                  ) : (
-                    <svg className="w-12 h-12 text-gray-400" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M 20 50 Q 50 20, 80 50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                      <path d="M 30 55 L 70 60" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                    </svg>
-                  )}
-                </div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Authorized By</p>
-                <p className="text-xs text-gray-500 mt-1">{signatory.signatory_name}</p>
-                <p className="text-xs text-gray-500">{signatory.signatory_title}</p>
-              </div>
+          {/* Signature Section */}
+          <div className="mb-4 pb-4 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-3">AUTHORIZATION & SIGNATURE</p>
 
-              {/* Timestamp */}
-              <div className="text-center">
-                <div className="h-16 border-b-2 border-gray-400 mb-2 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 font-mono">{currentTime.toISOString().split('T')[0]}</p>
-                    <p className="text-xs text-gray-600 font-mono">{receiptTime} GMT</p>
-                  </div>
-                </div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Processing Time</p>
-                <p className="text-xs text-gray-500 mt-1">Digital Timestamp</p>
+            {/* Signature */}
+            {signatory.digital_signature && (
+              <div className="mb-3 text-center">
+                <img
+                  src={signatory.digital_signature}
+                  alt="Digital Signature"
+                  className="h-12 object-contain mx-auto"
+                />
+              </div>
+            )}
+
+            {/* Signatory Details */}
+            <div className="text-sm space-y-1 mb-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Signatory Name:</span>
+                <span className="font-semibold">{signatory.signatory_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Title:</span>
+                <span>{signatory.signatory_title}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Email:</span>
+                <span className="font-mono text-xs">{signatory.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Phone:</span>
+                <span className="font-mono text-xs">{signatory.phone}</span>
               </div>
             </div>
-          </div>
 
-          {/* Security & Authenticity */}
-          <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-8">
-            <p className="text-xs text-gray-600 font-semibold uppercase mb-2">Receipt Security Features</p>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p>✓ Digitally Signed Receipt</p>
-              <p>✓ Official GIA Bank Portal Verification</p>
-              <p>✓ Tamper-Proof Transaction Record</p>
-              <p>✓ Automated System Generated</p>
+            {/* Timestamp */}
+            <div className="text-center border-t border-gray-300 pt-2">
+              <p className="text-xs text-gray-600">Authorized on: {currentTime.toLocaleDateString('en-GM')} {receiptTime}</p>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center py-6 border-t-2 border-gray-400 mt-8">
-            <p className="text-xs text-gray-600 font-semibold">OFFICIAL PAYMENT RECEIPT</p>
-            <p className="text-xs text-gray-500 mt-2">This is an officially signed digital receipt from GIA Bank Portal</p>
-            <p className="text-xs text-gray-500">For inquiries, contact: {globalSettings.bank_contact_email}</p>
+          <div className="text-center text-xs text-gray-600 pt-2">
+            <p className="font-semibold mb-1">OFFICIAL RECEIPT</p>
+            <p>{globalSettings.bank_contact_email}</p>
             {globalSettings.bank_contact_phone && (
-              <p className="text-xs text-gray-500">Phone: {globalSettings.bank_contact_phone}</p>
+              <p>{globalSettings.bank_contact_phone}</p>
             )}
-            <p className="text-xs text-gray-500 mt-3 print:block hidden">
-              Document ID: {registrationId} | Generated: {currentTime.toLocaleString('en-GM')}
-            </p>
           </div>
         </div>
       </div>
