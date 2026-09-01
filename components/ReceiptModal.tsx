@@ -62,7 +62,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const [receiptSaved, setReceiptSaved] = useState(false);
   const [savingReceipt, setSavingReceipt] = useState(false);
-  const saveAttemptedRef = useRef(false);
 
   const fetchSignatorySettings = async () => {
     try {
@@ -179,16 +178,19 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   }, [signatory, data]);
 
   useEffect(() => {
-    console.log('ReceiptModal useEffect ran, saveAttemptedRef.current:', saveAttemptedRef.current);
+    // Use sessionStorage to track if we've already saved for this data combo
+    const cacheKey = `receipt_saved_${data.reference_number}`;
+    const alreadySaved = sessionStorage.getItem(cacheKey);
 
-    // Guard: only run once per component mount
-    if (saveAttemptedRef.current) {
-      console.log('Skipping - already attempted save');
+    console.log('ReceiptModal useEffect ran for ref:', data.reference_number, 'alreadySaved:', alreadySaved);
+
+    if (alreadySaved) {
+      console.log('Skipping - already saved this receipt');
       return;
     }
 
-    console.log('Setting saveAttemptedRef to true and proceeding with save');
-    saveAttemptedRef.current = true;
+    console.log('Marking as saved and proceeding with save');
+    sessionStorage.setItem(cacheKey, 'true');
 
     // Fetch signatory and save receipt
     (async () => {
@@ -198,7 +200,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       // Save after settings are fetched
       handleSaveReceipt();
     })();
-  }, []);
+  }, [data.reference_number]);
 
   const handlePrint = () => {
     window.print();
