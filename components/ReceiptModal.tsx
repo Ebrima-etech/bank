@@ -1,7 +1,7 @@
 import { BiX, BiPrinter } from 'react-icons/bi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface ReceiptData {
   pilgrim_first_name: string;
@@ -64,21 +64,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   const [savingReceipt, setSavingReceipt] = useState(false);
   const saveAttemptedRef = useRef(false);
 
-  useEffect(() => {
-    fetchSignatorySettings();
-
-    // Save receipt exactly once
-    // Use ref to survive StrictMode double-render
-    if (!saveAttemptedRef.current) {
-      saveAttemptedRef.current = true;
-      handleSaveReceipt();
-    }
-
-    return () => {
-      // Cleanup: don't reset the ref
-    };
-  }, []);
-
   const fetchSignatorySettings = async () => {
     try {
       // Fetch active signatory from GIA backend
@@ -111,7 +96,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     }
   };
 
-  const handleSaveReceipt = async () => {
+  const handleSaveReceipt = useCallback(async () => {
     try {
       setSavingReceipt(true);
       const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
@@ -188,7 +173,20 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     } finally {
       setSavingReceipt(false);
     }
-  };
+  }, [signatory, data]);
+
+  // Fetch signatory settings on mount
+  useEffect(() => {
+    fetchSignatorySettings();
+  }, []);
+
+  // Save receipt exactly once on mount (after settings are available)
+  useEffect(() => {
+    if (!saveAttemptedRef.current) {
+      saveAttemptedRef.current = true;
+      handleSaveReceipt();
+    }
+  }, []);
 
   const handlePrint = () => {
     window.print();
