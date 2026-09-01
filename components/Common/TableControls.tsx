@@ -50,7 +50,7 @@ export function TableFilter({ label, value, options, onChange, multi = false }: 
       {multi ? (
         <div className="space-y-2">
           {options.map((option) => (
-            <label key={option.value} className="flex items-center gap-2">
+            <label key={String(option.value)} className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={Array.isArray(value) && value.includes(String(option.value))}
