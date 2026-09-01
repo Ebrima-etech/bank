@@ -81,13 +81,13 @@ export default function BankDashboardPage() {
     const referenceNumber = submission.reference_number || `REF${submission.id}`;
 
     const receiptData: any = {
-      pilgrim_first_name: submission.pilgrim_first_name || submission.pilgrim?.first_name || 'Unknown',
-      pilgrim_last_name: submission.pilgrim_last_name || submission.pilgrim?.last_name || 'Unknown',
-      pilgrim_phone: submission.pilgrim_phone || submission.pilgrim?.phone_number || '',
-      pilgrim_email: submission.pilgrim_email || submission.pilgrim?.email || '',
-      pilgrim_passport_number: submission.pilgrim_passport_number || submission.pilgrim?.passport_number || '',
-      pilgrim_date_of_birth: submission.pilgrim_date_of_birth || submission.pilgrim?.date_of_birth || '',
-      pilgrim_gender: submission.pilgrim_gender || submission.pilgrim?.gender || 'M',
+      pilgrim_first_name: submission.pilgrim?.first_name || 'Unknown',
+      pilgrim_last_name: submission.pilgrim?.last_name || 'Unknown',
+      pilgrim_phone: submission.pilgrim?.phone_number || '',
+      pilgrim_email: submission.pilgrim?.email || '',
+      pilgrim_passport_number: submission.pilgrim?.passport_number || '',
+      pilgrim_date_of_birth: submission.pilgrim?.date_of_birth || '',
+      pilgrim_gender: submission.pilgrim?.gender || 'M',
       amount: submission.amount || 0,
       reference_number: referenceNumber,
       payment_date: formatDateForBackend(submission.submitted_at),
