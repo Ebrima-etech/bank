@@ -3,6 +3,30 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import api from '@/lib/api';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// Print styles for professional receipt printing
+const printStyles = `
+  @media print {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+    }
+    html, body, #__next {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    @page {
+      margin: 0.5in;
+      size: A4;
+    }
+  }
+`;
+
 interface ReceiptData {
   pilgrim_first_name: string;
   pilgrim_last_name: string;
@@ -62,6 +86,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const [receiptSaved, setReceiptSaved] = useState(false);
   const [savingReceipt, setSavingReceipt] = useState(false);
+
+  // Add print styles on mount
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = printStyles;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   const fetchSignatorySettings = async () => {
     try {
@@ -211,8 +246,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   const receiptTime = currentTime.toLocaleTimeString('en-GM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-w-full print:max-h-none print:rounded-none print:shadow-none">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between print:hidden">
           <h2 className="text-xl font-bold text-gray-900">Payment Receipt</h2>
@@ -240,7 +275,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         </div>
 
         {/* Receipt Content */}
-        <div className="p-8 print:p-4">
+        <div className="p-8 print:p-12 print:max-w-full print:m-0 print:bg-white">
           {/* Official Header with Stamp */}
           <div className="relative text-center mb-8 pb-6 border-b-2 border-gray-400">
             <h1 className="text-3xl font-bold text-gray-900">GIA Bank Portal</h1>
