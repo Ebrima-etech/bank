@@ -133,7 +133,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       const receiptPayload: any = {
         signatory: signatory.id && signatory.id > 0 ? signatory.id : null,
         receipt_number: receiptNumber,
-        reference_number: data.reference_number,
         payment: data.payment_id || null,
         pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
         pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
