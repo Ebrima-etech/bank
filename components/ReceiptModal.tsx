@@ -221,6 +221,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       console.log('About to make API.POST call with payload:', receiptPayload);
       const response = await api.post('/receipts/', receiptPayload);
       console.log('API.POST returned:', response.data);
+
+      // Update signatory display with data from response
+      if (response.data.signatory_name) {
+        setSignatory({
+          ...signatory,
+          signatory_name: response.data.signatory_name,
+          signatory_title: response.data.signatory_title || signatory.signatory_title,
+        });
+        console.log('Updated signatory display:', response.data.signatory_name);
+      }
+
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
