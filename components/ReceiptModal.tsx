@@ -220,7 +220,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
       const receiptPayload: any = {
         receipt_number: receiptNumber,
-        payment: data.payment_id || null,
+        payment_reference: data.reference_number || '',
         signatory: signatoryData.id && signatoryData.id > 0 ? signatoryData.id : null,
       };
 
