@@ -466,34 +466,34 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
     <div className="receipt-print-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 print:p-0 print:bg-white print:static">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto print:max-w-full print:max-h-none print:rounded-none print:shadow-none print:overflow-visible">
         {/* Receipt Content */}
-        <div className="p-6 print:p-6 print:max-w-full print:m-0 print:bg-white" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div className="p-3 print:p-2 print:max-w-full print:m-0 print:bg-white" style={{ maxWidth: '400px', margin: '0 auto' }}>
           {/* Header */}
-          <div className="text-center mb-4 pb-4 border-b border-gray-300">
-            <h1 className="text-xl font-bold text-gray-900">GIA BANK PORTAL</h1>
-            <p className="text-xs text-gray-600 mt-1">Gambia International Airlines</p>
-            <p className="text-xs text-gray-500">PAYMENT RECEIPT</p>
+          <div className="text-center mb-2 pb-2 border-b border-gray-300">
+            <h1 className="text-lg font-bold text-gray-900 leading-tight">GIA BANK PORTAL</h1>
+            <p className="text-xs text-gray-600">Gambia International Airlines</p>
+            <p className="text-xs text-gray-500 leading-tight">PAYMENT RECEIPT</p>
 
             {/* Stamp */}
             {signatory.official_stamp && (
-              <div className="mt-3 flex justify-center">
+              <div className="mt-1 flex justify-center">
                 <img
                   src={signatory.official_stamp}
                   alt="Official Stamp"
-                  className="w-16 h-16 opacity-70 print:opacity-100 object-contain"
+                  className="w-12 h-12 opacity-70 print:opacity-100 object-contain"
                 />
               </div>
             )}
           </div>
 
           {/* Receipt Details */}
-          <div className="mb-4 pb-4 border-b border-gray-300 text-sm">
-            <div className="flex justify-between mb-1">
+          <div className="mb-2 pb-2 border-b border-gray-300 text-xs space-y-0.5">
+            <div className="flex justify-between">
               <span className="text-gray-600">Receipt #:</span>
-              <span className="font-mono font-semibold">{registrationId}</span>
+              <span className="font-mono font-semibold text-xs">{registrationId}</span>
             </div>
-            <div className="flex justify-between mb-1">
+            <div className="flex justify-between">
               <span className="text-gray-600">Reference #:</span>
-              <span className="font-mono font-semibold">{data.reference_number}</span>
+              <span className="font-mono font-semibold text-xs">{data.reference_number}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Date & Time:</span>
@@ -502,110 +502,80 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
           </div>
 
           {/* Pilgrim Information */}
-          <div className="mb-4 pb-4 border-b border-gray-300">
-            <p className="text-xs font-semibold text-gray-700 uppercase mb-2">PILGRIM</p>
-            <div className="text-sm space-y-1">
+          <div className="mb-2 pb-2 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-1">PILGRIM</p>
+            <div className="text-xs space-y-0.5">
               <div className="flex justify-between">
                 <span className="text-gray-600">Name:</span>
-                <span>{data.pilgrim_first_name} {data.pilgrim_last_name}</span>
+                <span className="text-xs">{data.pilgrim_first_name} {data.pilgrim_last_name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Gender:</span>
-                <span>{data.pilgrim_gender === 'M' ? 'Male' : 'Female'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">DOB:</span>
-                <span className="text-xs">{data.pilgrim_date_of_birth || 'N/A'}</span>
+                <span className="text-xs">{data.pilgrim_gender === 'M' ? 'M' : 'F'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Passport:</span>
                 <span className="font-mono text-xs">{data.pilgrim_passport_number || 'N/A'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Phone:</span>
-                <span className="font-mono text-xs">{data.pilgrim_phone}</span>
-              </div>
-              {data.pilgrim_email && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Email:</span>
-                  <span className="font-mono text-xs">{data.pilgrim_email}</span>
-                </div>
-              )}
             </div>
           </div>
 
           {/* Payer Information */}
-          <div className="mb-4 pb-4 border-b border-gray-300">
-            <p className="text-xs font-semibold text-gray-700 uppercase mb-2">PAYER</p>
-            <div className="text-sm space-y-1">
+          <div className="mb-2 pb-2 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-1">PAYER</p>
+            <div className="text-xs space-y-0.5">
               <div className="flex justify-between">
                 <span className="text-gray-600">Name:</span>
-                <span>{data.payer_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Relationship:</span>
-                <span>{data.payer_relationship}</span>
+                <span className="text-xs">{data.payer_name}</span>
               </div>
             </div>
           </div>
 
           {/* Amount */}
-          <div className="mb-4 pb-4 border-b border-gray-300">
+          <div className="mb-2 pb-2 border-b border-gray-300">
             <div className="text-center">
-              <p className="text-xs text-gray-600 font-semibold mb-2">AMOUNT PAID</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(data.amount)}</p>
-              <p className="text-xs text-gray-600 mt-2">Date: {data.payment_date}</p>
+              <p className="text-xs text-gray-600 font-semibold">AMOUNT PAID</p>
+              <p className="text-xl font-bold text-gray-900">{formatCurrency(data.amount)}</p>
+              <p className="text-xs text-gray-600">{data.payment_date}</p>
             </div>
           </div>
 
           {/* Signature Section */}
-          <div className="mb-4 pb-4 border-b border-gray-300">
-            <p className="text-xs font-semibold text-gray-700 uppercase mb-3">AUTHORIZATION & SIGNATURE</p>
+          <div className="mb-2 pb-2 border-b border-gray-300">
+            <p className="text-xs font-semibold text-gray-700 uppercase mb-1">AUTHORIZATION</p>
 
             {/* Signature */}
             {signatory.digital_signature && (
-              <div className="mb-3 text-center">
+              <div className="mb-1 text-center">
                 <img
                   src={signatory.digital_signature}
                   alt="Digital Signature"
-                  className="h-12 object-contain mx-auto"
+                  className="h-8 object-contain mx-auto"
                 />
               </div>
             )}
 
             {/* Signatory Details */}
-            <div className="text-sm space-y-1 mb-3">
+            <div className="text-xs space-y-0.5 mb-1">
               <div className="flex justify-between">
-                <span className="text-gray-600">Signatory Name:</span>
-                <span className="font-semibold">{signatory.signatory_name}</span>
+                <span className="text-gray-600">Signatory:</span>
+                <span className="font-semibold text-xs">{signatory.signatory_name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Title:</span>
-                <span>{signatory.signatory_title}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Email:</span>
-                <span className="font-mono text-xs">{signatory.email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Phone:</span>
-                <span className="font-mono text-xs">{signatory.phone}</span>
+                <span className="text-xs">{signatory.signatory_title}</span>
               </div>
             </div>
 
             {/* Timestamp */}
-            <div className="text-center border-t border-gray-300 pt-2">
-              <p className="text-xs text-gray-600">Authorized on: {currentTime.toLocaleDateString('en-GM')} {receiptTime}</p>
+            <div className="text-center border-t border-gray-300 pt-1">
+              <p className="text-xs text-gray-600">{currentTime.toLocaleDateString('en-GM')} {receiptTime}</p>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-xs text-gray-600 pt-2">
-            <p className="font-semibold mb-1">OFFICIAL RECEIPT</p>
-            <p>{globalSettings.bank_contact_email}</p>
-            {globalSettings.bank_contact_phone && (
-              <p>{globalSettings.bank_contact_phone}</p>
-            )}
+          <div className="text-center text-xs text-gray-600">
+            <p className="font-semibold">OFFICIAL RECEIPT</p>
           </div>
         </div>
       </div>
