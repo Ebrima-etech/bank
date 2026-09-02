@@ -247,20 +247,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
 
-      // Generate and open PDF in new tab immediately
-      console.log('Generating PDF...');
-      try {
-        await generateAndOpenPDF(receiptNumber, signatoryData);
-        console.log('PDF generated, closing modal');
-      } catch (pdfError) {
-        console.error('Error generating PDF:', pdfError);
-      }
-
-      // Close modal after PDF generation completes
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
       console.error('Error response:', error.response);
@@ -282,10 +268,26 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         errorMsg = error.message || 'Failed to save receipt';
       }
 
-      alert(`Failed to save receipt: ${errorMsg}`);
+      // Show error but don't block PDF generation
+      alert(`Receipt: ${errorMsg}`);
+      console.warn('Continuing to generate PDF despite save error');
     } finally {
       setSavingReceipt(false);
     }
+
+    // Generate and open PDF regardless of save success/failure
+    console.log('Generating PDF...');
+    try {
+      await generateAndOpenPDF(receiptNumber, signatoryData);
+      console.log('PDF generated and opened');
+    } catch (pdfError) {
+      console.error('Error generating PDF:', pdfError);
+    }
+
+    // Close modal after PDF generation completes
+    setTimeout(() => {
+      onClose();
+    }, 2000);
   }, [data]);
 
   const handleSaveReceipt = () => {
