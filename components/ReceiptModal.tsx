@@ -222,17 +222,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         signatory: signatoryData.id && signatoryData.id > 0 ? signatoryData.id : null,
         receipt_number: receiptNumber,
         payment: data.payment_id || null,
-        pilgrim_first_name: cleanValue(data.pilgrim_first_name) || 'Unknown',
-        pilgrim_last_name: cleanValue(data.pilgrim_last_name) || 'Unknown',
-        pilgrim_email: cleanValue(data.pilgrim_email),
-        pilgrim_phone: cleanValue(data.pilgrim_phone),
-        pilgrim_passport: cleanValue(data.pilgrim_passport_number),
-        pilgrim_dob: cleanValue(data.pilgrim_date_of_birth) || null,
-        pilgrim_gender: data.pilgrim_gender || 'M',
-        payer_name: cleanValue(data.payer_name) || 'Unknown',
-        payer_relationship: cleanValue(data.payer_relationship),
-        amount: data.amount || 0,
-        payment_date: formatDateForBackend(data.payment_date),
       };
 
       console.log('About to make API.POST call with payload:', receiptPayload);
