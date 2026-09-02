@@ -717,8 +717,6 @@ export default function BankDashboardPage() {
           )}
         </>
       )}
-        />
-      )}
     </Layout>
   );
 }
