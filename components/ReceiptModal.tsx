@@ -333,9 +333,16 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       let container: HTMLElement | null = null;
       let attempts = 0;
       while (!container && attempts < 10) {
-        container = document.querySelector('.receipt-print-container > div') as HTMLElement;
+        // Try to find the receipt content container
+        container = document.querySelector('.receipt-print-container > div > div[style*="maxWidth"]') as HTMLElement;
         if (!container) {
-          console.log('Container not found yet, waiting...');
+          container = document.querySelector('.receipt-print-container > div > div:last-child') as HTMLElement;
+        }
+        if (!container) {
+          container = document.querySelector('.receipt-print-container div[style*="maxWidth"]') as HTMLElement;
+        }
+        if (!container) {
+          console.log('Container not found yet (attempt ' + (attempts + 1) + '/10), waiting...');
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
         }
@@ -343,6 +350,12 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
       if (!container) {
         console.error('Receipt element not found after retries');
+        console.error('Trying to dump DOM structure...');
+        const printContainer = document.querySelector('.receipt-print-container');
+        console.error('Print container found:', !!printContainer);
+        if (printContainer) {
+          console.error('Print container children:', printContainer.children.length);
+        }
         return;
       }
 
