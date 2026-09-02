@@ -564,7 +564,7 @@ export default function BankDashboardPage() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">{stat.label}</p>
-                      {stat.isFinancial && (
+                      {stat.isFinancial && stat.fieldId && (
                         <button
                           onClick={() => toggleFieldVisibility(stat.fieldId)}
                           className="p-1 hover:bg-gray-200 rounded transition-colors"
@@ -575,7 +575,7 @@ export default function BankDashboardPage() {
                       )}
                     </div>
                     <p className={`text-2xl font-bold ${stat.color} mt-3 font-mono`}>
-                      {stat.isFinancial && isFieldHidden(stat.fieldId) ? '••••••' : (stat.isFinancial ? formatCurrency(stat.value as number) : stat.value)}
+                      {stat.isFinancial && stat.fieldId && isFieldHidden(stat.fieldId) ? '••••••' : (stat.isFinancial ? formatCurrency(stat.value as number) : stat.value)}
                     </p>
                   </div>
                   <Icon size={20} className="text-gray-400" />
