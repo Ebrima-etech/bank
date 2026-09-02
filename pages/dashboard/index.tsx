@@ -689,7 +689,7 @@ export default function BankDashboardPage() {
                 // Find the submission ID from the data and mark it as generated
                 const submissionId = submissions.find(sub =>
                   sub.reference_number === selectedReceipt.reference_number ||
-                  sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
+                  sub.id === selectedReceipt.registration_id?.replace('REC', '')
                 )?.id;
                 if (submissionId) {
                   handleReceiptGenerated(submissionId);
@@ -707,7 +707,7 @@ export default function BankDashboardPage() {
                 // Find the submission ID from the data and mark it as generated
                 const submissionId = submissions.find(sub =>
                   sub.reference_number === selectedReceipt.reference_number ||
-                  sub.id === parseInt(selectedReceipt.registration_id?.replace('REC', ''))
+                  sub.id === selectedReceipt.registration_id?.replace('REC', '')
                 )?.id;
                 if (submissionId) {
                   handleReceiptGenerated(submissionId);
