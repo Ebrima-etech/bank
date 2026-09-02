@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import Button from '@/components/Common/Button';
-import { BiPlus, BiTrash, BiX, BiUser, BiEdit, BiLock, BiUnlock } from 'react-icons/bi';
+import { BiPlus, BiTrash, BiX, BiUser, BiEdit, BiLock } from 'react-icons/bi';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 
@@ -504,7 +504,7 @@ export default function StaffManagementPage() {
                             : 'bg-green-50 text-green-600 hover:bg-green-100'
                         }`}
                       >
-                        {member.is_active ? <BiLock size={14} /> : <BiUnlock size={14} />}
+                        {member.is_active ? <BiLock size={14} /> : <BiX size={14} />}
                         {member.is_active ? 'Deactivate' : 'Activate'}
                       </button>
                       <button
