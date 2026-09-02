@@ -241,18 +241,16 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       setReceiptSaved(true);
       onReceiptSaved?.();
       console.log('Receipt saved successfully:', receiptNumber);
-      console.log('Setting timeout to generate PDF...');
 
-      // Generate and open PDF in new tab, then close modal
-      const timeoutId = setTimeout(async () => {
-        console.log('Timeout fired! About to call generateAndOpenPDF');
-        console.log('Current signatory state:', signatory);
-        await generateAndOpenPDF(receiptNumber, signatory);
-        console.log('PDF generated, closing modal');
-        setTimeout(() => {
-          onClose();
-        }, 1000);
-      }, 1000);
+      // Generate and open PDF in new tab immediately
+      console.log('Generating PDF...');
+      await generateAndOpenPDF(receiptNumber, signatoryData);
+      console.log('PDF generated, closing modal');
+
+      // Close modal after PDF opens
+      setTimeout(() => {
+        onClose();
+      }, 500);
 
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
@@ -301,8 +299,8 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       return;
     }
 
-    // Wait for signatory to be loaded (not the default value)
-    if (signatory.signatory_name === 'GIA Bank Admin') {
+    // Only save after signatory is loaded
+    if (!signatoryLoaded) {
       console.log('Waiting for signatory to load before saving...');
       return;
     }
@@ -312,7 +310,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
     // Save receipt - backend will auto-fetch and assign active signatory
     handleSaveReceipt();
-  }, [data.reference_number, signatory]);
+  }, [signatoryLoaded, data.reference_number]);
 
   const generateAndOpenPDF = useCallback(async (receiptNumber: string, signatoryData?: Signatory) => {
     try {
