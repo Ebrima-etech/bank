@@ -244,13 +244,17 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
       // Generate and open PDF in new tab immediately
       console.log('Generating PDF...');
-      await generateAndOpenPDF(receiptNumber, signatoryData);
-      console.log('PDF generated, closing modal');
+      try {
+        await generateAndOpenPDF(receiptNumber, signatoryData);
+        console.log('PDF generated, closing modal');
+      } catch (pdfError) {
+        console.error('Error generating PDF:', pdfError);
+      }
 
-      // Close modal after PDF opens
+      // Close modal after PDF generation completes
       setTimeout(() => {
         onClose();
-      }, 500);
+      }, 2000);
 
     } catch (error: any) {
       console.warn('Failed to save receipt:', error);
@@ -328,11 +332,25 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       await new Promise(resolve => setTimeout(resolve, 200));
 
       console.log('Starting PDF generation for receipt:', receiptNumber);
-      const container = document.querySelector('.receipt-print-container > div') as HTMLElement;
+
+      // Wait for container to be available
+      let container: HTMLElement | null = null;
+      let attempts = 0;
+      while (!container && attempts < 10) {
+        container = document.querySelector('.receipt-print-container > div') as HTMLElement;
+        if (!container) {
+          console.log('Container not found yet, waiting...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+      }
+
       if (!container) {
-        console.error('Receipt element not found');
+        console.error('Receipt element not found after retries');
         return;
       }
+
+      console.log('Container found, generating PDF...');
 
       console.log('Container found, waiting for images to load...');
 
