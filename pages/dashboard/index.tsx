@@ -45,7 +45,7 @@ export default function BankDashboardPage() {
   const [paymentAccessLevel, setPaymentAccessLevel] = useState<'date_restricted' | 'unrestricted'>('date_restricted');
   const [hiddenFields, setHiddenFields] = useState<Set<string>>(new Set());
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
-  const [generatedReceipts, setGeneratedReceipts] = useState<Set<number>>(new Set());
+  const [generatedReceipts, setGeneratedReceipts] = useState<Set<string>>(new Set());
   const [generatingReceipt, setGeneratingReceipt] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
@@ -111,7 +111,7 @@ export default function BankDashboardPage() {
     setGeneratingReceipt(false);
   };
 
-  const handleReceiptGenerated = (submissionId: number) => {
+  const handleReceiptGenerated = (submissionId: string) => {
     setGeneratedReceipts(prev => new Set(prev).add(submissionId));
   };
 
