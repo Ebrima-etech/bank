@@ -189,10 +189,13 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
 
   const handleSaveReceiptWithSignatory = useCallback(async (signatoryData: Signatory) => {
     console.log('handleSaveReceiptWithSignatory called with signatory:', signatoryData);
+
+    // Generate receipt number before try block so it's available for PDF generation
+    const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
+    console.log('About to save receipt with number:', receiptNumber);
+
     try {
       setSavingReceipt(true);
-      const receiptNumber = `RCP${Date.now().toString().slice(-8)}`;
-      console.log('About to save receipt with number:', receiptNumber);
 
       // Format date as YYYY-MM-DD
       const formatDateForBackend = (dateStr: any) => {
