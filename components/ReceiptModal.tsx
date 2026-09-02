@@ -219,7 +219,6 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       };
 
       const receiptPayload: any = {
-        signatory: signatoryData.id && signatoryData.id > 0 ? signatoryData.id : null,
         receipt_number: receiptNumber,
         payment: data.payment_id || null,
       };
