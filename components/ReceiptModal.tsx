@@ -221,6 +221,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
       const receiptPayload: any = {
         receipt_number: receiptNumber,
         payment: data.payment_id || null,
+        signatory: signatoryData.id && signatoryData.id > 0 ? signatoryData.id : null,
       };
 
       console.log('About to make API.POST call with payload:', receiptPayload);
