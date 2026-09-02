@@ -294,7 +294,7 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   };
 
   useEffect(() => {
-    // Fetch signatory for display
+    // Fetch signatory once on mount
     console.log('ReceiptModal mounted, fetching signatory settings...');
     fetchSignatorySettings().catch(err => {
       console.error('Error in fetchSignatorySettings:', err);
@@ -302,24 +302,15 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
   }, []);
 
   useEffect(() => {
-    // Only initiate save once per modal instance
-    if (hasInitiatedSaveRef.current) {
-      console.log('Save already initiated, skipping');
+    // Save receipt once after signatory is loaded - only once
+    if (!signatoryLoaded || hasInitiatedSaveRef.current) {
       return;
     }
 
-    // Only save after signatory is loaded
-    if (!signatoryLoaded) {
-      console.log('Waiting for signatory to load before saving...');
-      return;
-    }
-
-    console.log('ReceiptModal useEffect - starting save for ref:', data.reference_number);
+    console.log('ReceiptModal - signatory loaded, initiating save for ref:', data.reference_number);
     hasInitiatedSaveRef.current = true;
-
-    // Save receipt - backend will auto-fetch and assign active signatory
     handleSaveReceipt();
-  }, [signatoryLoaded, data.reference_number]);
+  }, [signatoryLoaded]);
 
   const generateAndOpenPDF = useCallback(async (receiptNumber: string, signatoryData?: Signatory) => {
     try {
