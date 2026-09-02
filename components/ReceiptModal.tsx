@@ -72,6 +72,7 @@ interface ReceiptData {
   payer_name: string;
   payer_relationship: string;
   payment_id?: number;
+  bank_name?: string;
 }
 
 interface Signatory {
@@ -469,20 +470,9 @@ export default function ReceiptModal({ data, onClose, onReceiptSaved }: ReceiptM
         <div className="p-3 print:p-2 print:max-w-full print:m-0 print:bg-white" style={{ maxWidth: '400px', margin: '0 auto' }}>
           {/* Header */}
           <div className="text-center mb-2 pb-2 border-b border-gray-300">
-            <h1 className="text-lg font-bold text-gray-900 leading-tight">GIA BANK PORTAL</h1>
+            <h1 className="text-lg font-bold text-gray-900 leading-tight">{data.bank_name || 'PAYMENT RECEIPT'}</h1>
             <p className="text-xs text-gray-600">Gambia International Airlines</p>
             <p className="text-xs text-gray-500 leading-tight">PAYMENT RECEIPT</p>
-
-            {/* Stamp */}
-            {signatory.official_stamp && (
-              <div className="mt-1 flex justify-center">
-                <img
-                  src={signatory.official_stamp}
-                  alt="Official Stamp"
-                  className="w-12 h-12 opacity-70 print:opacity-100 object-contain"
-                />
-              </div>
-            )}
           </div>
 
           {/* Receipt Details */}
