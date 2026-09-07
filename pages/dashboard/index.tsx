@@ -321,18 +321,20 @@ export default function BankDashboardPage() {
         data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === selectedTeller);
       }
 
-      // Tellers can only see their own records
-      // If NOT an admin (i.e., they're a teller), filter to show only their records
+      // Tellers can only see their own records from today
+      // If NOT an admin (i.e., they're a teller), filter to show only their records from today
       if (!adminStatus && username) {
         console.log('DEBUG: Applying teller filter for user:', username);
         data = data.filter((sub: BankPaymentSubmission) => {
           const match = sub.submitted_by_user === username;
-          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${username} => ${match}`);
-          return match;
+          const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
+          const isTodaysRecord = submissionDate === selectedDate;
+          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${username} => ${match}, Date: ${submissionDate} === ${selectedDate} => ${isTodaysRecord}`);
+          return match && isTodaysRecord;
         });
-        console.log('DEBUG: After user filter:', data.length);
+        console.log('DEBUG: After user and date filter:', data.length);
       } else {
-        console.log('DEBUG: Admin user, showing all records');
+        console.log('DEBUG: Admin user, showing filtered records');
       }
 
       setSubmissions(data);
