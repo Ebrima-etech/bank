@@ -301,9 +301,18 @@ export default function BankDashboardPage() {
 
       // Always filter by selected date for summary stats
       // Summary cards should show only records from the selected date
+      console.log('DEBUG: Filtering by selectedDate:', selectedDate);
+      console.log('DEBUG: Sample submission dates:', data.slice(0, 3).map(s => ({
+        submitted_at: s.submitted_at,
+        parsed: new Date(s.submitted_at).toISOString().split('T')[0],
+        submitted_by_user: s.submitted_by_user
+      })));
+
       data = data.filter((sub: BankPaymentSubmission) => {
         const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
-        return submissionDate === selectedDate;
+        const matches = submissionDate === selectedDate;
+        console.log(`DEBUG: Submission ${sub.id}: ${submissionDate} === ${selectedDate} ? ${matches}`);
+        return matches;
       });
 
       console.log('DEBUG: After date filter:', data.length);
