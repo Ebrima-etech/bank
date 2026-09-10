@@ -299,12 +299,6 @@ export default function BankDashboardPage() {
       console.log('DEBUG: Selected date:', selectedDate);
       console.log('DEBUG: Access level:', paymentAccessLevel);
 
-      // Calculate cumulative stats from ALL data (before filtering for display)
-      const cumulativeTotal = data.length;
-      const cumulativeAmount = data.reduce((sum: number, s: BankPaymentSubmission) => sum + s.amount, 0);
-      const cumulativeVerified = data.filter((s: BankPaymentSubmission) => s.status === 'verified').length;
-      const cumulativePending = data.filter((s: BankPaymentSubmission) => s.status === 'pending').length;
-
       // For admins with date_restricted access, apply date filter for DISPLAY only
       // For unrestricted access, show all submissions
       if (adminStatus && paymentAccessLevel === 'date_restricted') {
@@ -339,12 +333,17 @@ export default function BankDashboardPage() {
 
       setSubmissions(data);
 
-      // Use cumulative stats (not filtered) for stats cards
+      // Calculate stats from filtered data (teller-specific for non-admins)
+      const total = data.length;
+      const amount = data.reduce((sum: number, s: BankPaymentSubmission) => sum + s.amount, 0);
+      const verified = data.filter((s: BankPaymentSubmission) => s.status === 'verified').length;
+      const pending = data.filter((s: BankPaymentSubmission) => s.status === 'pending').length;
+
       setStats({
-        total: cumulativeTotal,
-        amount: cumulativeAmount,
-        verified: cumulativeVerified,
-        pending: cumulativePending
+        total,
+        amount,
+        verified,
+        pending
       });
     } catch (error) {
       console.error('Failed to fetch submissions:', error);
