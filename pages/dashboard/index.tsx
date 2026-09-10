@@ -299,34 +299,26 @@ export default function BankDashboardPage() {
       console.log('DEBUG: Selected date:', selectedDate);
       console.log('DEBUG: Access level:', paymentAccessLevel);
 
-      // For admins with date_restricted access, apply date filter for DISPLAY only
-      // For unrestricted access, show all submissions
-      if (adminStatus && paymentAccessLevel === 'date_restricted') {
-        data = data.filter((sub: BankPaymentSubmission) => {
-          const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
-          return submissionDate === selectedDate;
-        });
-      }
+      // Always filter by selected date for summary stats
+      // Summary cards should show only records from the selected date
+      data = data.filter((sub: BankPaymentSubmission) => {
+        const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
+        return submissionDate === selectedDate;
+      });
 
-      console.log('DEBUG: After access level filter:', data.length);
+      console.log('DEBUG: After date filter:', data.length);
 
       // Filter by teller if admin selected one
       if (adminStatus && selectedTeller) {
         data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === selectedTeller);
       }
 
-      // Tellers can only see their own records from today
-      // If NOT an admin (i.e., they're a teller), filter to show only their records from today
+      // Tellers can only see their own records
+      // If NOT an admin (i.e., they're a teller), filter to show only their records
       if (!adminStatus && username) {
         console.log('DEBUG: Applying teller filter for user:', username);
-        data = data.filter((sub: BankPaymentSubmission) => {
-          const match = sub.submitted_by_user === username;
-          const submissionDate = new Date(sub.submitted_at).toISOString().split('T')[0];
-          const isTodaysRecord = submissionDate === selectedDate;
-          console.log(`DEBUG: Checking ${sub.submitted_by_user} === ${username} => ${match}, Date: ${submissionDate} === ${selectedDate} => ${isTodaysRecord}`);
-          return match && isTodaysRecord;
-        });
-        console.log('DEBUG: After user and date filter:', data.length);
+        data = data.filter((sub: BankPaymentSubmission) => sub.submitted_by_user === username);
+        console.log('DEBUG: After user filter:', data.length);
       } else {
         console.log('DEBUG: Admin user, showing filtered records');
       }
